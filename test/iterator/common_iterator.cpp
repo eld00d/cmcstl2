@@ -14,6 +14,8 @@
 #include "../simple_test.hpp"
 #include "../test_iterators.hpp"
 
+template <class> class show_type;
+
 int main() {
   {
     namespace models = ::__stl2::models;
@@ -138,5 +140,17 @@ int main() {
     CI last{sentinel<int*>{rgi+10}};
     CHECK(std::accumulate(first, last, 0, std::plus<int>{}) == 45);
   }
+
+  // Test operator->
+  {
+    struct A { int value; };
+    A a{42};
+    using CI = __stl2::common_iterator<
+      input_iterator<A*>,
+      sentinel<A*>>;
+    CI i{input_iterator<A*>(&a)};
+    CHECK(i->value == 42);
+  }
+
   return test_result();
 }

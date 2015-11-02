@@ -57,5 +57,14 @@ int main()
         CHECK((d - c) == 0);
     }
 
+    {
+        struct A { int value; };
+        A a[] = {{0}, {1}, {2}, {3}};
+        auto i = counted_iterator<A*>{a, 4};
+        CHECK(i->value == 0);
+        CHECK((++i)->value == 1);
+        CHECK((i + 2)->value == 3);
+    }
+
     return ::test_result();
 }

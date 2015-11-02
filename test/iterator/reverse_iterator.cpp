@@ -456,5 +456,15 @@ int main() {
       test25(s+5, 5, s);
   }
 
+  {
+    // Test operator->
+    struct A { int value; };
+    A a[] = {13, 42};
+    auto ri = __stl2::make_reverse_iterator(a + 2);
+    CHECK(ri->value == 42);
+    ++ri;
+    CHECK(ri->value == 13);
+  }
+
   return test_result();
 }

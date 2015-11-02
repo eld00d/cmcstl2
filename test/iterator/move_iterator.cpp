@@ -163,10 +163,36 @@ void test_proxy_iterator() {
   CHECK(A::move_count == N);
 }
 
+template <class> class show_type;
+
+void test_operator_arrow() {
+  struct A {
+    int value = 42;
+    A() = default;
+    A(A&& that) :
+      value{__stl2::exchange(that.value, 0)} {}
+    A(const A&) = delete;
+    A(int v) : value{v} {}
+    A& operator=(A&& that) & {
+      value = __stl2::exchange(that.value, 0);
+      return *this;
+    }
+    A& operator=(const A&) & = delete;
+  };
+  A a{42};
+  A b{0};
+  auto i = __stl2::make_move_iterator(&a);
+  CHECK(i->value == 42);
+  b = *i;
+  CHECK(i->value == 0);
+  CHECK(b.value == 42);
+}
+
 int main() {
   test_move_iterator();
   test_iter_move();
   test_both();
   test_proxy_iterator();
+  test_operator_arrow();
   return ::test_result();
 }

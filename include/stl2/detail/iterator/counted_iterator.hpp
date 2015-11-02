@@ -15,6 +15,7 @@
 #include <stl2/type_traits.hpp>
 #include <stl2/detail/ebo_box.hpp>
 #include <stl2/detail/fwd.hpp>
+#include <stl2/detail/operator_arrow.hpp>
 #include <stl2/detail/iterator/common_iterator.hpp>
 #include <stl2/detail/iterator/concepts.hpp>
 #include <stl2/detail/iterator/default_sentinel.hpp>
@@ -72,6 +73,12 @@ STL2_OPEN_NAMESPACE {
     STL2_CONSTEXPR_EXT decltype(auto) operator*()
       noexcept(noexcept(*declval<I&>())) {
       return *current();
+    }
+
+    // Extension
+    STL2_CONSTEXPR_EXT decltype(auto) operator->() const
+      requires Readable<I>() {
+      return __stl2::__operator_arrow(current());
     }
 
     STL2_CONSTEXPR_EXT counted_iterator& operator++() &

@@ -14,6 +14,7 @@
 
 #include <stl2/type_traits.hpp>
 #include <stl2/detail/fwd.hpp>
+#include <stl2/detail/operator_arrow.hpp>
 #include <stl2/detail/iterator/concepts.hpp>
 
 STL2_OPEN_NAMESPACE {
@@ -52,10 +53,9 @@ STL2_OPEN_NAMESPACE {
       return __stl2::iter_move(current_);
     }
   
-    // FIXME: constraints
-    pointer operator->() const
-      noexcept(is_nothrow_copy_constructible<I>::value) {
-      return current_;
+    // Extension
+    STL2_CONSTEXPR_EXT decltype(auto) operator->() const {
+      return __stl2::__operator_arrow(current_);
     }
   
     move_iterator& operator++() &

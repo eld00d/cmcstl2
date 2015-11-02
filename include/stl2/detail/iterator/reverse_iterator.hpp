@@ -14,6 +14,7 @@
 
 #include <stl2/type_traits.hpp>
 #include <stl2/detail/fwd.hpp>
+#include <stl2/detail/operator_arrow.hpp>
 #include <stl2/detail/concepts/compare.hpp>
 #include <stl2/detail/iterator/concepts.hpp>
 #include <stl2/detail/iterator/operations.hpp>
@@ -30,7 +31,7 @@ STL2_OPEN_NAMESPACE {
     using value_type = value_type_t<I>;
     using iterator_category = iterator_category_t<I>;
     using reference = reference_t<I>;
-    using pointer = I;
+    using pointer = decltype(__stl2::__operator_arrow(declval<I>()));
 
     reverse_iterator() = default;
     explicit reverse_iterator(I x)
@@ -66,15 +67,9 @@ STL2_OPEN_NAMESPACE {
       return *__stl2::prev(current);
     }
 
-    pointer operator->() const
-#if 0 // FIXME: hard error when I is a pointer.
-      requires _Is<I, std::is_pointer> ||
-        requires (const I& i) {
-          i.operator->();
-        }
-#endif
-    {
-      return __stl2::prev(current);
+    // Not to spec
+    pointer operator->() const {
+      return __stl2::__operator_arrow(__stl2::prev(current));
     }
 
     // 20150813: Extension.
