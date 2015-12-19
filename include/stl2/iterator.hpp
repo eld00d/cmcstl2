@@ -28,6 +28,7 @@
 #include <stl2/detail/iterator/istreambuf_iterator.hpp>
 #include <stl2/detail/iterator/ostreambuf_iterator.hpp>
 #include <stl2/detail/iterator/move_iterator.hpp>
+#include <stl2/detail/iterator/move_into_iterator.hpp>
 #include <stl2/detail/iterator/operations.hpp>
 #include <stl2/detail/iterator/ostream_iterator.hpp>
 #include <stl2/detail/iterator/reverse_iterator.hpp>

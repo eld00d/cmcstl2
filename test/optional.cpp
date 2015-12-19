@@ -138,6 +138,7 @@ int main() {
     using OI = __stl2::optional<int>;
     using OD = __stl2::optional<double>;
     static_assert(models::StrictTotallyOrdered<OI, OD>);
+    static_assert(!models::Swappable<int&, double&>);
     static_assert(!models::Swappable<OI&, OD&>);
   }
 

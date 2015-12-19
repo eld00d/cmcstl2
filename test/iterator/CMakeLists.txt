@@ -33,3 +33,6 @@ add_test(test.iterator.make_range make_range)
 
 add_executable(iter.incomplete incomplete.cpp)
 add_test(test.iterator.incomplete iter.incomplete)
+
+add_executable(move_into move_into.cpp)
+add_test(test.iterator.move_into move_into)

@@ -16,6 +16,7 @@
 #include <stl2/type_traits.hpp>
 #include <stl2/detail/fwd.hpp>
 #include <stl2/detail/meta.hpp>
+#include <stl2/detail/proxy_move.hpp>
 #include <stl2/detail/concepts/core.hpp>
 #include <stl2/detail/concepts/object/assignable.hpp>
 #include <stl2/detail/concepts/object/move_constructible.hpp>
@@ -67,8 +68,7 @@ STL2_OPEN_NAMESPACE {
       requires (const F& f, T& t, U& u) { f(t, u); }
     constexpr bool has_operator<F, T, U> = true;
 
-    class fn {
-    public:
+    struct fn {
       template <class T, class U>
       requires
         has_customization<T, U>
@@ -77,22 +77,43 @@ STL2_OPEN_NAMESPACE {
         (void)swap(__stl2::forward<T>(t), __stl2::forward<U>(u))
       )
 
-      template <class T>
+      template <class T, class U,
+        class PMT = decltype(__stl2::proxy_move(__stl2::declval<T>())),
+        class PMU = decltype(__stl2::proxy_move(__stl2::declval<U>())),
+        class DT = decay_t<PMT>,
+        class DU = decay_t<PMU>>
       requires
-        !has_customization<T&, T&> &&
-        models::MoveConstructible<T> &&
-        models::Assignable<T&, T&&>
-      constexpr void operator()(T& a, T& b) const
-      STL2_NOEXCEPT_RETURN(
-        (void)(b = __stl2::exchange(a, __stl2::move(b)))
-      )
+        !has_customization<T, U> &&
+        __is_proxy_reference<T> &&
+        __is_proxy_reference<U> &&
+        Same<DT, DU>() && // FIXME: relax.
+        Constructible<DT, PMT>() &&
+        Constructible<DU, PMU>() &&
+        requires(T&& t, U&& u, DT&& dt, DU&& du) {
+          (T&&)t = __stl2::proxy_move((U&&)u);
+          (U&&)u = __stl2::proxy_move((T&&)t);
+          (T&&)t = (DU&&)du;
+          (U&&)u = (DT&&)dt;
+        }
+      constexpr void operator()(T&& t, U&& u) const
+      noexcept(is_nothrow_constructible<DT, PMT>::value &&
+               is_nothrow_constructible<DU, PMU>::value &&
+               noexcept((T&&)t = __stl2::proxy_move((U&&)u)) &&
+               noexcept((U&&)u = __stl2::proxy_move((T&&)t)) &&
+               noexcept((T&&)t = __stl2::declval<DU&&>()) &&
+               noexcept((U&&)u = __stl2::declval<DT&&>()))
+      {
+        auto tmp = __stl2::proxy_move((T&&)t);
+        (T&&)t = __stl2::proxy_move((U&&)u);
+        (U&&)u = __stl2::move(tmp);
+      }
 
       template <class T, class U, std::size_t N, class F = fn>
       requires
         !has_customization<T(&)[N], U(&)[N]> &&
         has_operator<F, T, U>
       constexpr void operator()(T (&t)[N], U (&u)[N]) const
-        noexcept(noexcept(declval<const F&>()(t[0], u[0])))
+      noexcept(noexcept(declval<const F&>()(t[0], u[0])))
       {
         for (std::size_t i = 0; i < N; ++i) {
           (*this)(t[i], u[i]);

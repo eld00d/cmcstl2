@@ -33,19 +33,23 @@ struct reference_wrapper {
     return *ptr_;
   }
 
-  reference_wrapper& operator=(const T& t) &
+  reference_wrapper& operator=(const T& t) &&
     noexcept(std::is_nothrow_copy_assignable<T>::value) {
     get() = t;
     return *this;
   }
 
-  reference_wrapper& operator=(T&& t) // FIXME: &
+  reference_wrapper& operator=(T&& t) &&
     noexcept(std::is_nothrow_move_assignable<T>::value) {
     get() = __stl2::move(t);
     return *this;
   }
 
   operator T&() const noexcept { return get(); }
+
+  friend T&& proxy_move(reference_wrapper&& r) noexcept {
+    return std::move(r.get());
+  }
 };
 
 template <class T, std::size_t N>
@@ -78,7 +82,8 @@ struct array {
     }
 
     T* operator->() const noexcept
-      requires std::is_class<T>::value || std::is_union<T>::value {
+    requires std::is_class<T>::value || std::is_union<T>::value
+    {
       STL2_ASSUME(ptr_);
       return ptr_;
     }
@@ -104,12 +109,6 @@ struct array {
 
     iterator operator+(std::ptrdiff_t n) const noexcept {
       return {ptr_ + n};
-    }
-
-    friend T&& iter_move(iterator i) noexcept {
-      //std::cout << "iter_move(" << static_cast<void*>(i.ptr_) << ")\n";
-      STL2_ASSUME(i.ptr_);
-      return static_cast<T&&>(*i.ptr_);
     }
   };
 
@@ -376,17 +375,25 @@ void test_iter_swap2() {
 
     static_assert(models::Same<I, decltype(a.begin() + 2)>);
     static_assert(models::CommonReference<const R&, const R&>);
-    static_assert(!models::Swappable<R, R>);
-    static_assert(models::IndirectlyMovableStorable<I, I>);
-
-    // Swappable<R, R>() is not satisfied, and
-    // IndirectlyMovableStorable<I, I>() is satisfied,
-    // so this should resolve to the second overload of iter_swap.
+    static_assert(models::Swappable<R, R>);
     __stl2::iter_swap(a.begin() + 1, a.begin() + 3);
     CHECK(a[0] == 0);
     CHECK(a[1] == 3);
     CHECK(a[2] == 2);
     CHECK(a[3] == 1);
+    int i = 42;
+    __stl2::swap(*(a.begin() + 1), i);
+    CHECK(a[0] == 0);
+    CHECK(a[1] == 42);
+    CHECK(a[2] == 2);
+    CHECK(a[3] == 1);
+    CHECK(i == 3);
+    __stl2::iter_swap(a.begin() + 2, &i);
+    CHECK(a[0] == 0);
+    CHECK(a[1] == 42);
+    CHECK(a[2] == 3);
+    CHECK(a[3] == 1);
+    CHECK(i == 2);
   }
 }
 

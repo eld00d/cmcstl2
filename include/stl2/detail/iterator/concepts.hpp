@@ -20,6 +20,7 @@
 #include <stl2/utility.hpp>
 #include <stl2/detail/fwd.hpp>
 #include <stl2/detail/meta.hpp>
+#include <stl2/detail/proxy_move.hpp>
 #include <stl2/detail/concepts/compare.hpp>
 #include <stl2/detail/concepts/core.hpp>
 #include <stl2/detail/concepts/fundamental.hpp>
@@ -56,41 +57,12 @@ STL2_OPEN_NAMESPACE {
   // From the proxy iterator work (P0022).
   //
   namespace __iter_move {
-    template <detail::Dereferenceable R>
-    constexpr bool has_customization = false;
-    template <detail::Dereferenceable R>
-    requires
-      requires(R&& r) {
-        STL2_DEDUCE_AUTO_REF_REF(iter_move(r));
-      }
-    constexpr bool has_customization<R> = true;
-
-    detail::Dereferenceable{R}
-    using __iter_move_t =
-      meta::if_<
-        is_reference<reference_t<R>>,
-        remove_reference_t<reference_t<R>>&&,
-        decay_t<reference_t<R>>>;
-
     struct fn {
-      template <class R>
-      requires
-        has_customization<R>
+      template <detail::Dereferenceable R>
       constexpr decltype(auto) operator()(R&& r) const
       STL2_NOEXCEPT_RETURN(
-        iter_move(__stl2::forward<R>(r))
+        __stl2::proxy_move(*(R&&)r)
       )
-
-
-      template <class R,
-        class Result = __iter_move_t<remove_reference_t<R>>>
-      requires
-        !has_customization<R>
-      constexpr Result operator()(R&& r) const
-        noexcept(noexcept(Result(__stl2::move(*r))))
-      {
-        return __stl2::move(*r);
-      }
     };
   }
   // Workaround GCC PR66957 by declaring this unnamed namespace inline.
@@ -340,62 +312,6 @@ STL2_OPEN_NAMESPACE {
   // From the proxy iterator work (P0022).
   //
   namespace __iter_swap {
-    // Poison pill for iter_swap. (See the detailed discussion at
-    // https://github.com/ericniebler/stl2/issues/139)
-    template <class R1, class R2>
-    void iter_swap(R1&&, R2&&) = delete;
-
-    template <class R1, class R2>
-    constexpr bool has_customization = false;
-    template <class R1, class R2>
-    requires
-      requires (R1&& r1, R2&& r2) {
-        iter_swap((R1&&)r1, (R2&&)r2);
-      }
-    constexpr bool has_customization<R1, R2> = true;
-
-    template <class UR1, class UR2, class R1, class R2>
-    requires
-      has_customization<R1, R2>
-    constexpr void impl(R1&& r1, R2&& r2)
-    STL2_NOEXCEPT_RETURN(
-      (void)iter_swap(__stl2::forward<R1>(r1), __stl2::forward<R2>(r2))
-    )
-
-    template <class UR1, class UR2, class R1, class R2>
-    requires
-      !has_customization<R1, R2> &&
-      models::Swappable<reference_t<UR1>, reference_t<UR2>>
-    constexpr void impl(R1&& r1, R2&& r2)
-    STL2_NOEXCEPT_RETURN(
-      (void)__stl2::swap(*r1, *r2)
-    )
-
-    template <class UR1, class UR2, class R1, class R2>
-    requires
-      !has_customization<R1, R2> &&
-      !models::Swappable<reference_t<UR1>, reference_t<UR2>> &&
-      models::IndirectlyMovableStorable<UR1, UR2> &&
-      models::IndirectlyMovableStorable<UR2, UR1>
-    constexpr void impl(R1&& r1, R2&& r2)
-      noexcept(is_nothrow_indirectly_movable_storable_v<UR1, UR2> &&
-               is_nothrow_indirectly_movable_storable_v<UR2, UR1>)
-    {
-      value_type_t<UR1> tmp = __stl2::iter_move(r1);
-      *r1 = __stl2::iter_move(r2);
-      *r2 = __stl2::move(tmp);
-    }
-
-    template <class R1, class R2>
-    constexpr bool has_impl = false;
-    template <class R1, class R2>
-    requires
-      requires (R1&& r1, R2&& r2) {
-        __iter_swap::impl<remove_reference_t<R1>,
-                          remove_reference_t<R2>>((R1&&)r1, (R2&&)r2);
-      }
-    constexpr bool has_impl<R1, R2> = true;
-
     struct fn {
       template <class R1, class R2,
         class UR1 = remove_reference_t<R1>,
@@ -403,11 +319,11 @@ STL2_OPEN_NAMESPACE {
       requires
         models::Readable<UR1> &&
         models::Readable<UR2> &&
-        has_impl<R1, R2>
+        models::Swappable<reference_t<UR1>, reference_t<UR2>>
       constexpr void operator()(R1&& r1, R2&& r2) const
       STL2_NOEXCEPT_RETURN(
-        (void)__iter_swap::impl<UR1, UR2>(__stl2::forward<R1>(r1),
-                                          __stl2::forward<R2>(r2))
+         __stl2::swap(*__stl2::forward<R1>(r1),
+                      *__stl2::forward<R2>(r2))
       )
     };
   }
