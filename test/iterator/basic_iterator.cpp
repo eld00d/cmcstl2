@@ -188,6 +188,96 @@ struct always_cursor {
 template <class T, T Value>
 using always_iterator = stl2::basic_iterator<always_cursor<T, Value>>;
 
+template <class T>
+struct proxy_wrapper {
+  stl2::detail::raw_ptr<T> ptr_;
+
+  proxy_wrapper() = default;
+  proxy_wrapper(T& t) noexcept : ptr_{stl2::addressof(t)} {}
+  proxy_wrapper(T&&) = delete;
+
+  T& get() const noexcept {
+    return *ptr_;
+  }
+
+  proxy_wrapper& operator=(const T& t)
+    noexcept(std::is_nothrow_copy_assignable<T>::value) {
+    get() = t;
+    return *this;
+  }
+
+  proxy_wrapper& operator=(T&& t)
+    noexcept(std::is_nothrow_move_assignable<T>::value) {
+    get() = stl2::move(t);
+    return *this;
+  }
+
+  operator T&() const noexcept { return get(); }
+};
+
+// std::array-ish container with proxy iterators.
+template <class T, std::size_t N>
+struct proxy_array {
+  template <bool IsConst>
+  struct cursor {
+    using value_type = T;
+    using contiguous = std::true_type;
+
+    using O = meta::if_c<IsConst, const T, T>;
+    O* ptr_;
+
+    cursor() = default;
+    cursor(O* p) : ptr_{p} {}
+    template <bool B>
+    requires IsConst && !B
+    cursor(const cursor<B>& that) : ptr_{that.ptr_} {}
+
+    template <bool B>
+    bool equal(const cursor<B>& that) const noexcept { return ptr_ == that.ptr_; }
+    proxy_wrapper<O> read() const noexcept { return {*ptr_}; }
+    void next() noexcept { ++ptr_; }
+    void prev() noexcept { --ptr_; }
+    void advance(std::ptrdiff_t n) noexcept { ptr_ += n; }
+    template <bool B>
+    std::ptrdiff_t distance_to(const cursor<B>& that) const noexcept {
+      return that.ptr_ - ptr_;
+    }
+    O&& imove() const noexcept {
+      return stl2::move(*ptr_);
+    }
+  };
+
+  static_assert(stl2::cursor::Readable<cursor<false>>());
+  static_assert(stl2::cursor::IndirectMove<cursor<false>>());
+  static_assert(stl2::models::Same<T&&, stl2::cursor::rvalue_reference_t<cursor<false>>>);
+
+  static_assert(stl2::cursor::Readable<cursor<true>>());
+  static_assert(stl2::cursor::IndirectMove<cursor<true>>());
+  static_assert(stl2::models::Same<const T&&, stl2::cursor::rvalue_reference_t<cursor<true>>>);
+
+  using iterator = stl2::basic_iterator<cursor<false>>;
+  using const_iterator = stl2::basic_iterator<cursor<true>>;
+  using reference = proxy_wrapper<T>;
+  using const_reference = proxy_wrapper<const T>;
+
+  T e_[N];
+
+  iterator begin() { return {&e_[0]}; }
+  iterator end() { return {&e_[0] + N}; }
+
+  const_iterator begin() const { return {&e_[0]}; }
+  const_iterator end() const { return {&e_[0] + N}; }
+  const_iterator cbegin() const { return begin(); }
+  const_iterator cend() const { return end(); }
+
+  reference operator[](const std::size_t n) noexcept {
+    return {e_[n]};
+  }
+  const_reference operator[](const std::size_t n) const noexcept {
+    return {e_[n]};
+  }
+};
+
 template <stl2::InputRange R>
   requires stl2::ext::StreamInsertable<stl2::value_type_t<stl2::iterator_t<R>>> &&
     !stl2::Same<char, stl2::remove_cv_t<stl2::remove_all_extents_t<stl2::remove_reference_t<R>>>>()
@@ -333,6 +423,47 @@ void test_array() {
   stl2::fill(a, 42);
 }
 
+void test_proxy_array() {
+  auto a = proxy_array<int, 4>{0,1,2,3};
+
+  {
+    auto ci = a.cbegin();
+    CHECK((ci == a.begin()));
+    ci = a.begin();
+  }
+
+  using I = decltype(a.begin());
+  static_assert(stl2::models::Readable<I>);
+  using V = stl2::value_type_t<I>;
+  static_assert(stl2::models::Same<int, V>);
+  using R = stl2::reference_t<I>;
+  static_assert(stl2::models::Same<proxy_wrapper<int>, R>);
+
+  static_assert(stl2::models::Dereferenceable<const I&>);
+  static_assert(stl2::models::Dereferenceable<I&>);
+  static_assert(stl2::models::Same<int&&, decltype(iter_move(stl2::declval<const I&>()))>);
+  static_assert(stl2::models::Same<int&&, decltype(iter_move(stl2::declval<I&>()))>);
+  static_assert(stl2::__iter_move::has_customization<const I&>);
+  static_assert(stl2::__iter_move::has_customization<I&>);
+  using RR = stl2::rvalue_reference_t<I>;
+  static_assert(stl2::models::Same<int&&, RR>);
+
+  static_assert(stl2::models::Same<I, decltype(a.begin() + 2)>);
+  static_assert(stl2::models::CommonReference<const R&, const R&>);
+  static_assert(!stl2::models::Swappable<R, R>);
+  static_assert(stl2::models::IndirectlyMovableStorable<I, I>);
+
+  // Swappable<R, R>() is not satisfied, and
+  // IndirectlyMovableStorable<I, I>() is satisfied,
+  // so this should resolve to the second overload of iter_swap.
+  stl2::iter_swap(a.begin() + 1, a.begin() + 3);
+  CHECK(a[0] == 0);
+  CHECK(a[1] == 3);
+  CHECK(a[2] == 2);
+  CHECK(a[3] == 1);
+}
+
+
 void test_counted() {
   using stl2::counted_iterator;
   std::cout << "test_counted:\n";
@@ -425,6 +556,7 @@ int main() {
   test_rv();
   test_fl();
   test_array();
+  test_proxy_array();
   test_counted();
   test_always();
   test_back_inserter();
