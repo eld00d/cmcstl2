@@ -55,46 +55,7 @@ STL2_OPEN_NAMESPACE {
       using istream_type = std::basic_istream<charT, traits>;
       using int_type = typename traits::int_type;
       using single_pass = true_type;
-
-      class pointer {
-      public:
-        constexpr charT* operator->() noexcept {
-          return &keep_;
-        }
-
-      private:
-        friend cursor;
-
-        explicit constexpr pointer(const cursor& i)
-        noexcept(is_nothrow_move_constructible<charT>::value)
-        : keep_{i.current()}
-        {}
-
-        charT keep_;
-      };
-
-      class __proxy {
-      public:
-        using value_type = charT;
-
-        constexpr charT operator*() const
-        noexcept(is_nothrow_copy_constructible<charT>::value)
-        {
-          return keep_;
-        }
-
-      private:
-        friend cursor;
-
-        constexpr __proxy() noexcept = default;
-        constexpr __proxy(charT c, streambuf_type* sbuf)
-        noexcept(is_nothrow_move_constructible<charT>::value)
-        : keep_{__stl2::move(c)}, sbuf_{sbuf}
-        {}
-
-        charT keep_;
-        detail::raw_ptr<streambuf_type> sbuf_;
-      };
+      using pointer = detail::pointer_proxy<charT>;
 
       class mixin : protected detail::ebo_box<cursor> {
         using box_t = detail::ebo_box<cursor>;
@@ -131,27 +92,18 @@ STL2_OPEN_NAMESPACE {
       STL2_CONSTEXPR_EXT cursor(streambuf_type* s) noexcept
       : sbuf_{s}
       {}
-      STL2_CONSTEXPR_EXT cursor(const __proxy& p) noexcept
-      : cursor{p.sbuf_}
-      {}
       cursor(istream_type& s) noexcept
       : cursor{s.rdbuf()}
       {}
-
       charT read() const {
         return current();
       }
       pointer arrow() const {
-        return pointer{*this};
+        return pointer{current()};
       }
-
       void next() {
         advance();
       }
-      __proxy post_increment() {
-        return {traits::to_char_type(advance()), sbuf_};
-      }
-
       STL2_CONSTEXPR_EXT bool equal(const cursor& that) const noexcept {
         return eq(that);
       }

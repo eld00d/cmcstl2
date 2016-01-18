@@ -295,39 +295,24 @@ STL2_OPEN_NAMESPACE {
   class basic_iterator;
 
   namespace detail {
-    template <class I>
+    template <class I, bool IsWritable>
     struct postfix_increment_proxy {
       using value_type = value_type_t<I>;
-    private:
-      mutable value_type value_;
-    public:
-      postfix_increment_proxy() = default;
-      constexpr explicit postfix_increment_proxy(I const& x)
-      noexcept(noexcept(value_type(*x)))
-      : value_(*x)
-      {}
-      constexpr value_type& operator*() const noexcept {
-        return value_;
-      }
-    };
-
-    template <class I>
-    struct writable_postfix_increment_proxy {
-      using value_type = value_type_t<I>;
+      using reference = meta::if_c<IsWritable, const postfix_increment_proxy&, value_type&>;
     private:
       mutable value_type value_;
       I it_;
     public:
-      writable_postfix_increment_proxy() = default;
-      constexpr explicit writable_postfix_increment_proxy(I x)
+      postfix_increment_proxy() = default;
+      constexpr explicit postfix_increment_proxy(I x)
       : value_(*x), it_(__stl2::move(x))
       {}
-      constexpr const writable_postfix_increment_proxy& operator*() const noexcept
+      constexpr reference operator*() const noexcept
       {
         return *this;
       }
       friend constexpr value_type&& iter_move(
-        const writable_postfix_increment_proxy& ref)
+        const postfix_increment_proxy& ref) requires IsWritable
       {
         return __stl2::move(ref.value_);
       }
@@ -347,19 +332,27 @@ STL2_OPEN_NAMESPACE {
 
     template <class Ref, class Val>
     using is_non_proxy_reference =
-      is_convertible<
-        const volatile remove_reference_t<Ref>*,
-        const volatile Val*>;
+      is_convertible<const volatile remove_reference_t<Ref>*, const volatile Val*>;
 
     template <class I, class Val, class Ref, class Cat>
     using postfix_increment_result =
       meta::if_c<
         models::DerivedFrom<Cat, forward_iterator_tag>,
         I,
-        meta::if_<
-          is_non_proxy_reference<Ref, Val>,
-          postfix_increment_proxy<I>,
-          writable_postfix_increment_proxy<I>>>;
+        postfix_increment_proxy<I, !meta::_v<is_non_proxy_reference<Ref, Val>>>>;
+
+    template <class Val>
+    struct pointer_proxy {
+      explicit constexpr pointer_proxy(Val v)
+      noexcept(is_nothrow_move_constructible<Val>::value)
+      : keep_{__stl2::move(v)}
+      {}
+      constexpr Val* operator->() noexcept {
+        return &keep_;
+      }
+    private:
+      Val keep_;
+    };
 
     template <class Derived, class Head>
     struct proxy_reference_conversion {

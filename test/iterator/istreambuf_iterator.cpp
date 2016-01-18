@@ -31,9 +31,6 @@ namespace {
     static_assert(cursor::Sentinel<C, C>());
     static_assert(cursor::Sentinel<default_sentinel, C>());
     static_assert(!cursor::Forward<C>());
-    static_assert(cursor::PostIncrement<C>());
-    static_assert(!detail::PostIncrementCursor<C>());
-    static_assert(detail::PostIncrementNotCursor<C>());
 
     using I = istreambuf_iterator<charT, traits>;
     static_assert(models::WeaklyIncrementable<I>);
@@ -71,7 +68,6 @@ namespace {
     CHECK(!(i != default_sentinel{}));
 
     static_assert(models::Same<decltype(i.operator->()), typename C::pointer>);
-    static_assert(models::Same<decltype(i.operator++(0)), typename C::__proxy>);
 
     static_assert(models::Constructible<I, default_sentinel>);
     static_assert(models::ConvertibleTo<default_sentinel, I>);
