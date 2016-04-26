@@ -162,11 +162,15 @@ STL2_OPEN_NAMESPACE {
   ///////////////////////////////////////////////////////////////////////////
   // RandomAccessIncrementable [Extension]
   //
+  template <class S, class I>
+  constexpr bool disable_sized_sentinel = false;
+
   namespace ext {
     template <class>
     constexpr bool __random_access_incrementable = false;
     template <class I>
-      requires requires (I& i, const I& ci, const difference_type_t<I> n) {
+    requires !disable_sized_sentinel<I, I> &&
+      requires (I& i, const I& ci, const difference_type_t<I> n) {
         STL2_EXACT_TYPE_CONSTRAINT(i += n, I&);
         STL2_EXACT_TYPE_CONSTRAINT(i -= n, I&);
         STL2_EXACT_TYPE_CONSTRAINT(ci + n, I);

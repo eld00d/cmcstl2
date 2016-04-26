@@ -600,9 +600,6 @@ STL2_OPEN_NAMESPACE {
   // distance between a Iterator and Sentinel that denote a range in
   // constant time.
   //
-  template <class S, class I>
-  constexpr bool disable_sized_sentinel = false;
-
   template <class, class>
   constexpr bool __sized_sentinel = false;
   template <class S, class I>
@@ -898,5 +895,16 @@ namespace std {
           ::__stl2::reference_t<In>>;
   };
 } // namespace std
+
+#ifdef _GLIBCXX_DEBUG
+#include <debug/safe_iterator.h>
+STL2_OPEN_NAMESPACE {
+  template <class I1, class I2, class Seq>
+  constexpr bool disable_sized_sentinel<
+    __gnu_debug::_Safe_iterator<I1, Seq>,
+    __gnu_debug::_Safe_iterator<I2, Seq>> =
+    !SizedSentinel<I1, I2>();
+} STL2_CLOSE_NAMESPACE
+#endif
 
 #endif
