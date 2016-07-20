@@ -24,10 +24,10 @@ int main() {
 	using RA = raw_ptr<A>;
 	using RB = raw_ptr<B>;
 
-	static_assert(stl2::models::Regular<RA>);
-	static_assert(stl2::models::StrictTotallyOrdered<RA>);
-	static_assert(stl2::models::Regular<RB>);
-	static_assert(stl2::models::StrictTotallyOrdered<RB>);
+	static_assert(stl2::Regular<RA>());
+	static_assert(stl2::StrictTotallyOrdered<RA>());
+	static_assert(stl2::Regular<RB>());
+	static_assert(stl2::StrictTotallyOrdered<RB>());
 
 	CHECK(RA{} == RA{});
 	CHECK(!(RA{} != RA{}));

@@ -90,27 +90,27 @@ STL2_OPEN_NAMESPACE {
 
 	template <class I, class O>
 	constexpr bool __unique_copy_req =
-		models::IndirectlyCopyable<I, O> &&
-			(models::ForwardIterator<I> ||
-			 models::ForwardIterator<O> ||
-			 models::IndirectlyCopyableStorable<I, O>);
+		IndirectlyCopyable<I, O>() &&
+			(ForwardIterator<I>() ||
+			 ForwardIterator<O>() ||
+			 IndirectlyCopyableStorable<I, O>());
 
 	template <class I, class S, class O, class R = equal_to<>,
 		class Proj = identity>
 	requires
-		models::InputIterator<__f<I>> &&
-		models::Sentinel<__f<S>, __f<I>> &&
-		models::WeaklyIncrementable<__f<O>> &&
+		InputIterator<__f<I>>() &&
+		Sentinel<__f<S>, __f<I>>() &&
+		WeaklyIncrementable<__f<O>>() &&
 		__unique_copy_req<__f<I>, __f<O>> &&
-		models::IndirectCallableRelation<
-			__f<R>, projected<__f<I>, __f<Proj>>>
+		IndirectCallableRelation<
+			__f<R>, projected<__f<I>, __f<Proj>>>()
 	tagged_pair<tag::in(__f<I>), tag::out(__f<O>)>
 	unique_copy(I&& first, S&& last, O&& result, R&& comp = R{},
 		Proj&& proj = Proj{})
 	{
 		return __stl2::__unique_copy(
-			meta::bool_<models::ForwardIterator<__f<I>>>{},
-			meta::bool_<models::ForwardIterator<__f<O>>>{},
+			meta::bool_<ForwardIterator<__f<I>>()>{},
+			meta::bool_<ForwardIterator<__f<O>>()>{},
 			__stl2::forward<I>(first), __stl2::forward<S>(last),
 			__stl2::forward<O>(result),
 			__stl2::forward<R>(comp),
@@ -120,16 +120,16 @@ STL2_OPEN_NAMESPACE {
 	template <InputRange Rng, class O, class R = equal_to<>,
 		class Proj = identity>
 	requires
-		models::WeaklyIncrementable<__f<O>> &&
+		WeaklyIncrementable<__f<O>>() &&
 		__unique_copy_req<iterator_t<Rng>, __f<O>> &&
-		models::IndirectCallableRelation<
-			__f<R>, projected<iterator_t<Rng>, __f<Proj>>>
+		IndirectCallableRelation<
+			__f<R>, projected<iterator_t<Rng>, __f<Proj>>>()
 	tagged_pair<tag::in(safe_iterator_t<Rng>), tag::out(__f<O>)>
 	unique_copy(Rng&& rng, O&& result, R&& comp = R{}, Proj&& proj = Proj{})
 	{
 		return __stl2::__unique_copy(
-			meta::bool_<models::ForwardIterator<iterator_t<Rng>>>{},
-			meta::bool_<models::ForwardIterator<__f<O>>>{},
+			meta::bool_<ForwardIterator<iterator_t<Rng>>()>{},
+			meta::bool_<ForwardIterator<__f<O>>()>{},
 			__stl2::begin(rng), __stl2::end(rng),
 			__stl2::forward<O>(result),
 			__stl2::forward<R>(comp),
@@ -139,10 +139,10 @@ STL2_OPEN_NAMESPACE {
 	// Extension
 	template <class E, class O, class R = equal_to<>, class Proj = identity>
 	requires
-		models::WeaklyIncrementable<__f<O>> &&
+		WeaklyIncrementable<__f<O>>() &&
 		__unique_copy_req<const E*, __f<O>> &&
-		models::IndirectCallableRelation<
-			__f<R>, projected<const E*, __f<Proj>>>
+		IndirectCallableRelation<
+			__f<R>, projected<const E*, __f<Proj>>>()
 	tagged_pair<tag::in(dangling<const E*>), tag::out(__f<O>)>
 	unique_copy(std::initializer_list<E>&& rng, O&& result, R&& comp = R{},
 		Proj&& proj = Proj{})

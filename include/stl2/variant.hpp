@@ -156,7 +156,7 @@ STL2_OPEN_NAMESPACE {
 		// __variant::base: lowest layer of the variant implementation.
 		//
 		template <class...Ts>
-		requires (models::Destructible<element_t<Ts>> && ...)
+		requires (Destructible<element_t<Ts>>() && ...)
 		class base {
 			friend v_access;
 		protected:
@@ -473,7 +473,7 @@ STL2_OPEN_NAMESPACE {
 		};
 
 		template <class...Ts>
-		requires (models::MoveConstructible<element_t<Ts>> && ...)
+		requires (MoveConstructible<element_t<Ts>>() && ...)
 		class move_base<Ts...> : public destruct_base<Ts...> {
 			using base_t = destruct_base<Ts...>;
 		public:
@@ -491,7 +491,7 @@ STL2_OPEN_NAMESPACE {
 
 		template <class...Ts>
 		requires
-			(models::MoveConstructible<element_t<Ts>> && ...) &&
+			(MoveConstructible<element_t<Ts>>() && ...) &&
 			ext::TriviallyMoveConstructible<storage<element_t<Ts>...>>()
 		class move_base<Ts...> : public destruct_base<Ts...> {
 			using base_t = destruct_base<Ts...>;
@@ -516,7 +516,7 @@ STL2_OPEN_NAMESPACE {
 		};
 
 		template <class...Ts>
-		requires (models::Movable<element_t<Ts>> && ...)
+		requires (Movable<element_t<Ts>>() && ...)
 		class move_assign_base<Ts...> : public move_base<Ts...> {
 			using base_t = move_base<Ts...>;
 		public:
@@ -540,7 +540,7 @@ STL2_OPEN_NAMESPACE {
 
 		template <class...Ts>
 		requires
-			(models::Movable<element_t<Ts>> && ...) &&
+			(Movable<element_t<Ts>>() && ...) &&
 			ext::TriviallyMovable<storage<element_t<Ts>...>>()
 		class move_assign_base<Ts...> : public move_base<Ts...> {
 			using base_t = move_base<Ts...>;
@@ -565,7 +565,7 @@ STL2_OPEN_NAMESPACE {
 		};
 
 		template <class...Ts>
-		requires (models::CopyConstructible<element_t<Ts>> && ...)
+		requires (CopyConstructible<element_t<Ts>>() && ...)
 		class copy_base<Ts...> : public move_assign_base<Ts...> {
 			using base_t = move_assign_base<Ts...>;
 		public:
@@ -583,7 +583,7 @@ STL2_OPEN_NAMESPACE {
 
 		template <class...Ts>
 		requires
-			(models::CopyConstructible<element_t<Ts>> && ...) &&
+			(CopyConstructible<element_t<Ts>>() && ...) &&
 			ext::TriviallyCopyConstructible<storage<element_t<Ts>...>>()
 		class copy_base<Ts...> : public move_assign_base<Ts...> {
 			using base_t = move_assign_base<Ts...>;
@@ -608,7 +608,7 @@ STL2_OPEN_NAMESPACE {
 		};
 
 		template <class...Ts>
-		requires (models::Copyable<element_t<Ts>> && ...)
+		requires (Copyable<element_t<Ts>>() && ...)
 		class copy_assign_base<Ts...> : public copy_base<Ts...> {
 			using base_t = copy_base<Ts...>;
 		public:
@@ -632,7 +632,7 @@ STL2_OPEN_NAMESPACE {
 
 		template <class...Ts>
 		requires
-			(models::Copyable<element_t<Ts>> && ...) &&
+			(Copyable<element_t<Ts>>() && ...) &&
 			ext::TriviallyCopyable<storage<element_t<Ts>...>>()
 		class copy_assign_base<Ts...> : public copy_base<Ts...> {
 			using base_t = copy_base<Ts...>;
@@ -646,7 +646,7 @@ STL2_OPEN_NAMESPACE {
 	// operators, and converting assignments.
 	//
 	template <class...Ts>
-	requires (models::Destructible<__variant::element_t<Ts>> && ...)
+	requires (Destructible<__variant::element_t<Ts>>() && ...)
 	class variant : public __variant::copy_assign_base<Ts...> {
 		using base_t = __variant::copy_assign_base<Ts...>;
 
@@ -743,7 +743,7 @@ STL2_OPEN_NAMESPACE {
 				__variant::element_t<Ts>&, __variant::element_t<Ts>&>...>>)
 		requires
 			Movable<base_t>() && // Movable<variant>() explodes here.
-			(models::Swappable<__variant::element_t<Ts>&> && ...)
+			(Swappable<__variant::element_t<Ts>&>() && ...)
 		{
 			if (this->index_ == that.index_) {
 				if (this->valid()) {
@@ -763,7 +763,7 @@ STL2_OPEN_NAMESPACE {
 		}
 
 		friend constexpr bool operator==(const variant& lhs, const variant& rhs)
-		requires (models::EqualityComparable<__variant::element_t<Ts>> && ...)
+		requires (EqualityComparable<__variant::element_t<Ts>>() && ...)
 		{
 			if (lhs.index_ != rhs.index_) {
 				return false;
@@ -772,13 +772,13 @@ STL2_OPEN_NAMESPACE {
 		}
 
 		friend constexpr bool operator!=(const variant& lhs, const variant& rhs)
-		requires (models::EqualityComparable<__variant::element_t<Ts>> && ...)
+		requires (EqualityComparable<__variant::element_t<Ts>>() && ...)
 		{
 			return !(lhs == rhs);
 		}
 
 		friend constexpr bool operator<(const variant& lhs, const variant& rhs)
-		requires (models::StrictTotallyOrdered<__variant::element_t<Ts>> && ...)
+		requires (StrictTotallyOrdered<__variant::element_t<Ts>>() && ...)
 		{
 			if (lhs.index_ < rhs.index_) {
 				return true;
@@ -790,19 +790,19 @@ STL2_OPEN_NAMESPACE {
 		}
 
 		friend constexpr bool operator>(const variant& lhs, const variant& rhs)
-		requires (models::StrictTotallyOrdered<__variant::element_t<Ts>> && ...)
+		requires (StrictTotallyOrdered<__variant::element_t<Ts>>() && ...)
 		{
 			return rhs < lhs;
 		}
 
 		friend constexpr bool operator<=(const variant& lhs, const variant& rhs)
-		requires (models::StrictTotallyOrdered<__variant::element_t<Ts>> && ...)
+		requires (StrictTotallyOrdered<__variant::element_t<Ts>>() && ...)
 		{
 			return !(rhs < lhs);
 		}
 
 		friend constexpr bool operator>=(const variant& lhs, const variant& rhs)
-		requires (models::StrictTotallyOrdered<__variant::element_t<Ts>> && ...)
+		requires (StrictTotallyOrdered<__variant::element_t<Ts>>() && ...)
 		{
 			return !(lhs < rhs);
 		}
@@ -827,7 +827,8 @@ STL2_OPEN_NAMESPACE {
 
 namespace std {
 	template <::__stl2::__variant::Variant V>
-	struct tuple_size<V> : ::meta::size<::__stl2::__variant::VariantTypes<V>> {};
+	struct tuple_size<V>
+	: ::meta::size<::__stl2::__variant::VariantTypes<V>> {};
 
 	template <size_t I, ::__stl2::__variant::Variant V>
 	struct tuple_element<I, V>

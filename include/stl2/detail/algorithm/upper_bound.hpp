@@ -27,8 +27,8 @@ STL2_OPEN_NAMESPACE {
 		ext::callable_wrapper<__f<C>> comp_;
 		const T& value_;
 
-		constexpr __upper_bound_fn(C&& comp, const T& value) :
-			comp_(__stl2::forward<C>(comp)), value_(value) {}
+		constexpr __upper_bound_fn(C&& comp, const T& value)
+		: comp_(__stl2::forward<C>(comp)), value_(value) {}
 
 		constexpr bool operator()(auto&& i) const {
 			return !comp_(value_, i);
@@ -38,9 +38,9 @@ STL2_OPEN_NAMESPACE {
 	namespace ext {
 		template <class I, class T, class Comp = less<>, class Proj = identity>
 		requires
-			models::ForwardIterator<__f<I>> &&
-			models::IndirectCallableStrictWeakOrder<
-				__f<Comp>, const T*, projected<__f<I>, __f<Proj>>>
+			ForwardIterator<__f<I>>() &&
+			IndirectCallableStrictWeakOrder<
+				__f<Comp>, const T*, projected<__f<I>, __f<Proj>>>()
 		__f<I> upper_bound_n(I&& first, difference_type_t<__f<I>> n, const T& value,
 			Comp&& comp = Comp{}, Proj&& proj = Proj{})
 		{
@@ -52,10 +52,9 @@ STL2_OPEN_NAMESPACE {
 
 	template <class I, class S, class T, class Comp = less<>, class Proj = identity>
 	requires
-		models::ForwardIterator<__f<I>> &&
-		models::Sentinel<__f<S>, __f<I>> &&
-		models::IndirectCallableStrictWeakOrder<
-			__f<Comp>, const T*, projected<__f<I>, __f<Proj>>>
+		ForwardIterator<__f<I>>() && Sentinel<__f<S>, __f<I>>() &&
+		IndirectCallableStrictWeakOrder<
+			__f<Comp>, const T*, projected<__f<I>, __f<Proj>>>()
 	__f<I> upper_bound(I&& first, S&& last, const T& value,
 		Comp&& comp = Comp{}, Proj&& proj = Proj{})
 	{
@@ -67,11 +66,10 @@ STL2_OPEN_NAMESPACE {
 
 	template <class I, class S, class T, class Comp = less<>, class Proj = identity>
 	requires
-		models::SizedSentinel<__f<S>, __f<I>> &&
-		models::ForwardIterator<__f<I>> &&
-		models::Sentinel<__f<S>, __f<I>> &&
-		models::IndirectCallableStrictWeakOrder<
-			__f<Comp>, const T*, projected<__f<I>, __f<Proj>>>
+		SizedSentinel<__f<S>, __f<I>>() && ForwardIterator<__f<I>>() &&
+		Sentinel<__f<S>, __f<I>>() &&
+		IndirectCallableStrictWeakOrder<
+			__f<Comp>, const T*, projected<__f<I>, __f<Proj>>>()
 	__f<I> upper_bound(I&& first_, S&& last, const T& value,
 		Comp&& comp = Comp{}, Proj&& proj = Proj{})
 	{
@@ -83,8 +81,8 @@ STL2_OPEN_NAMESPACE {
 
 	template <ForwardRange Rng, class T, class Comp = less<>, class Proj = identity>
 	requires
-		models::IndirectCallableStrictWeakOrder<
-			__f<Comp>, const T*, projected<iterator_t<Rng>, __f<Proj>>>
+		IndirectCallableStrictWeakOrder<
+			__f<Comp>, const T*, projected<iterator_t<Rng>, __f<Proj>>>()
 	safe_iterator_t<Rng>
 	upper_bound(Rng&& rng, const T& value,
 		Comp&& comp = Comp{}, Proj&& proj = Proj{})
@@ -95,9 +93,9 @@ STL2_OPEN_NAMESPACE {
 
 	template <ForwardRange Rng, class T, class Comp = less<>, class Proj = identity>
 	requires
-		models::SizedRange<Rng> &&
-		models::IndirectCallableStrictWeakOrder<
-			__f<Comp>, const T*, projected<iterator_t<Rng>, __f<Proj>>>
+		SizedRange<Rng>() &&
+		IndirectCallableStrictWeakOrder<
+			__f<Comp>, const T*, projected<iterator_t<Rng>, __f<Proj>>>()
 	safe_iterator_t<Rng>
 	upper_bound(Rng&& rng, const T& value,
 		Comp&& comp = Comp{}, Proj&& proj = Proj{})
@@ -109,8 +107,8 @@ STL2_OPEN_NAMESPACE {
 	// Extension
 	template <class E, class T, class Comp = less<>, class Proj = identity>
 	requires
-		models::IndirectCallableStrictWeakOrder<
-			__f<Comp>, const T*, projected<const E*, __f<Proj>>>
+		IndirectCallableStrictWeakOrder<
+			__f<Comp>, const T*, projected<const E*, __f<Proj>>>()
 	dangling<const E*>
 	upper_bound(std::initializer_list<E>&& rng, const T& value,
 		Comp&& comp = Comp{}, Proj&& proj = Proj{})

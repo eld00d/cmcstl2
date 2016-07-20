@@ -24,8 +24,8 @@ STL2_OPEN_NAMESPACE {
 	template <InputIterator I1, Sentinel<I1> S1, InputIterator I2, Sentinel<I2> S2,
 		class Comp = less<>, class Proj1 = identity, class Proj2 = identity>
 	requires
-		models::IndirectCallableStrictWeakOrder<__f<Comp>,
-			projected<I1, __f<Proj1>>, projected<I2, __f<Proj2>>>
+		IndirectCallableStrictWeakOrder<__f<Comp>,
+			projected<I1, __f<Proj1>>, projected<I2, __f<Proj2>>>()
 	bool lexicographical_compare(I1 first1, S1 last1, I2 first2, S2 last2,
 		Comp&& comp_ = Comp{}, Proj1&& proj1_ = Proj1{}, Proj2&& proj2_ = Proj2{})
 	{
@@ -46,9 +46,9 @@ STL2_OPEN_NAMESPACE {
 	template <InputRange Rng1, InputRange Rng2, class Comp = less<>,
 		class Proj1 = identity, class Proj2 = identity>
 	requires
-		models::IndirectCallableStrictWeakOrder<__f<Comp>,
+		IndirectCallableStrictWeakOrder<__f<Comp>,
 			projected<iterator_t<Rng1>, __f<Proj1>>,
-			projected<iterator_t<Rng2>, __f<Proj2>>>
+			projected<iterator_t<Rng2>, __f<Proj2>>>()
 	bool lexicographical_compare(Rng1&& rng1, Rng2&& rng2,
 		Comp&& comp = Comp{}, Proj1&& proj1 = Proj1{}, Proj2&& proj2 = Proj2{})
 	{
@@ -64,9 +64,9 @@ STL2_OPEN_NAMESPACE {
 	template <class E, InputRange Rng2, class Comp = less<>,
 		class Proj1 = identity, class Proj2 = identity>
 	requires
-		models::IndirectCallableStrictWeakOrder<__f<Comp>,
+		IndirectCallableStrictWeakOrder<__f<Comp>,
 			projected<const E*, __f<Proj1>>,
-			projected<iterator_t<Rng2>, __f<Proj2>>>
+			projected<iterator_t<Rng2>, __f<Proj2>>>()
 	bool lexicographical_compare(std::initializer_list<E>&& rng1, Rng2&& rng2,
 		Comp&& comp = Comp{}, Proj1&& proj1 = Proj1{}, Proj2&& proj2 = Proj2{})
 	{
@@ -82,9 +82,9 @@ STL2_OPEN_NAMESPACE {
 	template <InputRange Rng1, class E, class Comp = less<>,
 		class Proj1 = identity, class Proj2 = identity>
 	requires
-		models::IndirectCallableStrictWeakOrder<__f<Comp>,
+		IndirectCallableStrictWeakOrder<__f<Comp>,
 			projected<iterator_t<Rng1>, __f<Proj1>>,
-			projected<const E*, __f<Proj2>>>
+			projected<const E*, __f<Proj2>>>()
 	bool lexicographical_compare(Rng1&& rng1, std::initializer_list<E>&& rng2,
 		Comp&& comp = Comp{}, Proj1&& proj1 = Proj1{}, Proj2&& proj2 = Proj2{})
 	{
@@ -100,9 +100,9 @@ STL2_OPEN_NAMESPACE {
 	template <class E1, class E2, class Comp = less<>,
 		class Proj1 = identity, class Proj2 = identity>
 	requires
-		models::IndirectCallableStrictWeakOrder<__f<Comp>,
+		IndirectCallableStrictWeakOrder<__f<Comp>,
 			projected<const E1*, __f<Proj1>>,
-			projected<const E2*, __f<Proj2>>>
+			projected<const E2*, __f<Proj2>>>()
 	bool lexicographical_compare(
 		std::initializer_list<E1>&& rng1, std::initializer_list<E2>&& rng2,
 		Comp&& comp = Comp{}, Proj1&& proj1 = Proj1{}, Proj2&& proj2 = Proj2{})

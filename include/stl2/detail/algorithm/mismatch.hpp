@@ -29,9 +29,9 @@ STL2_OPEN_NAMESPACE {
 	mismatch(I1 first1, S1 last1, I2 first2, Pred&& pred_ = Pred{},
 		Proj1&& proj1_ = Proj1{}, Proj2&& proj2_ = Proj2{})
 	requires
-		models::IndirectCallablePredicate<__f<Pred>,
+		IndirectCallablePredicate<__f<Pred>,
 			projected<I1, __f<Proj1>>,
-			projected<I2, __f<Proj2>>>
+			projected<I2, __f<Proj2>>>()
 	{
 		auto pred = ext::make_callable_wrapper(__stl2::forward<Pred>(pred_));
 		auto proj1 = ext::make_callable_wrapper(__stl2::forward<Proj1>(proj1_));
@@ -49,8 +49,8 @@ STL2_OPEN_NAMESPACE {
 		InputIterator I2, Sentinel<I2> S2, class Pred = equal_to<>,
 		class Proj1 = identity, class Proj2 = identity>
 	requires
-		models::IndirectCallablePredicate<
-			__f<Pred>, projected<I1, __f<Proj1>>, projected<I2, __f<Proj2>>>
+		IndirectCallablePredicate<
+			__f<Pred>, projected<I1, __f<Proj1>>, projected<I2, __f<Proj2>>>()
 	tagged_pair<tag::in1(I1), tag::in2(I2)>
 	mismatch(I1 first1, S1 last1, I2 first2, S2 last2, Pred&& pred_ = Pred{},
 		Proj1&& proj1_ = Proj1{}, Proj2&& proj2_ = Proj2{})
@@ -75,10 +75,10 @@ STL2_OPEN_NAMESPACE {
 		Proj1&& proj1 = Proj1{}, Proj2&& proj2 = Proj2{})
 	requires
 		!is_array<remove_reference_t<I2>>::value &&
-		models::InputIterator<__f<I2>> &&
-		models::IndirectCallablePredicate<__f<Pred>,
+		InputIterator<__f<I2>>() &&
+		IndirectCallablePredicate<__f<Pred>,
 			projected<iterator_t<Rng1>, __f<Proj1>>,
-			projected<__f<I2>, __f<Proj2>>>
+			projected<__f<I2>, __f<Proj2>>>()
 	{
 		return __stl2::mismatch(
 			__stl2::begin(rng1), __stl2::end(rng1),
@@ -89,9 +89,9 @@ STL2_OPEN_NAMESPACE {
 	template <InputRange Rng1, InputRange Rng2, class Pred = equal_to<>,
 		class Proj1 = identity, class Proj2 = identity>
 	requires
-		models::IndirectCallablePredicate<__f<Pred>,
+		IndirectCallablePredicate<__f<Pred>,
 			projected<iterator_t<Rng1>, __f<Proj1>>,
-			projected<iterator_t<Rng2>, __f<Proj2>>>
+			projected<iterator_t<Rng2>, __f<Proj2>>>()
 	tagged_pair<tag::in1(safe_iterator_t<Rng1>), tag::in2(safe_iterator_t<Rng2>)>
 	mismatch(Rng1&& rng1, Rng2&& rng2, Pred&& pred = Pred{},
 		Proj1&& proj1 = Proj1{}, Proj2&& proj2 = Proj2{})
@@ -108,9 +108,9 @@ STL2_OPEN_NAMESPACE {
 	template <class E, InputRange Rng2, class Pred = equal_to<>,
 		class Proj1 = identity, class Proj2 = identity>
 	requires
-		models::IndirectCallablePredicate<__f<Pred>,
+		IndirectCallablePredicate<__f<Pred>,
 			projected<const E*, __f<Proj1>>,
-			projected<iterator_t<Rng2>, __f<Proj2>>>
+			projected<iterator_t<Rng2>, __f<Proj2>>>()
 	tagged_pair<tag::in1(dangling<const E*>), tag::in2(safe_iterator_t<Rng2>)>
 	mismatch(std::initializer_list<E>&& rng1, Rng2&& rng2, Pred&& pred = Pred{},
 		Proj1&& proj1 = Proj1{}, Proj2&& proj2 = Proj2{})
@@ -127,9 +127,9 @@ STL2_OPEN_NAMESPACE {
 	template <InputRange Rng1, class E, class Pred = equal_to<>,
 		class Proj1 = identity, class Proj2 = identity>
 	requires
-		models::IndirectCallablePredicate<__f<Pred>,
+		IndirectCallablePredicate<__f<Pred>,
 			projected<iterator_t<Rng1>, __f<Proj1>>,
-			projected<const E*, __f<Proj2>>>
+			projected<const E*, __f<Proj2>>>()
 	tagged_pair<tag::in1(safe_iterator_t<Rng1>), tag::in2(dangling<const E*>)>
 	mismatch(Rng1&& rng1, std::initializer_list<E>&& rng2, Pred&& pred = Pred{},
 		Proj1&& proj1 = Proj1{}, Proj2&& proj2 = Proj2{})
@@ -146,9 +146,9 @@ STL2_OPEN_NAMESPACE {
 	template <class E1, class E2, class Pred = equal_to<>,
 		class Proj1 = identity, class Proj2 = identity>
 	requires
-		models::IndirectCallablePredicate<__f<Pred>,
+		IndirectCallablePredicate<__f<Pred>,
 			projected<const E1*, __f<Proj1>>,
-			projected<const E2*, __f<Proj2>>>
+			projected<const E2*, __f<Proj2>>>()
 	tagged_pair<tag::in1(dangling<const E1*>), tag::in2(dangling<const E2*>)>
 	mismatch(std::initializer_list<E1>&& rng1,
 		std::initializer_list<E2>&& rng2, Pred&& pred = Pred{},

@@ -96,28 +96,28 @@ struct D : A {};
 char* begin(D&);
 
 void test() {
-	namespace models = __stl2::models;
+	namespace ranges = __stl2;
 
 	// Valid
 	static_assert(can_begin<int(&)[2]>);
-	static_assert(models::Same<decltype(__stl2::begin(__stl2::declval<int(&)[2]>())), int*>);
+	static_assert(ranges::Same<decltype(__stl2::begin(__stl2::declval<int(&)[2]>())), int*>());
 	static_assert(can_begin<const int(&)[2]>);
-	static_assert(models::Same<decltype(__stl2::begin(__stl2::declval<const int(&)[2]>())), const int*>);
+	static_assert(ranges::Same<decltype(__stl2::begin(__stl2::declval<const int(&)[2]>())), const int*>());
 
 	// Ill-formed: array rvalue
 	static_assert(!can_begin<int(&&)[2]>);
 
 	// Valid: only member begin
 	static_assert(can_begin<A&>);
-	static_assert(models::Same<decltype(__stl2::begin(__stl2::declval<A&>())), int*>);
+	static_assert(ranges::Same<decltype(__stl2::begin(__stl2::declval<A&>())), int*>());
 	static_assert(can_begin<const A&>);
-	static_assert(models::Same<decltype(__stl2::begin(__stl2::declval<const A&>())), const int*>);
+	static_assert(ranges::Same<decltype(__stl2::begin(__stl2::declval<const A&>())), const int*>());
 
 	// Valid: Both member and non-member begin, but non-member returns non-Iterator.
 	static_assert(can_begin<B&>);
-	static_assert(models::Same<decltype(__stl2::begin(__stl2::declval<B&>())), int*>);
+	static_assert(ranges::Same<decltype(__stl2::begin(__stl2::declval<B&>())), int*>());
 	static_assert(can_begin<const B&>);
-	static_assert(models::Same<decltype(__stl2::begin(__stl2::declval<const B&>())), const int*>);
+	static_assert(ranges::Same<decltype(__stl2::begin(__stl2::declval<const B&>())), const int*>());
 
 	// Valid: Both member and non-member begin, but non-member returns non-Iterator.
 	static_assert(can_begin<C&>);
@@ -125,15 +125,15 @@ void test() {
 
 	// Valid: Prefer member begin
 	static_assert(can_begin<D&>);
-	static_assert(models::Same<int*, decltype(__stl2::begin(__stl2::declval<D&>()))>);
+	static_assert(ranges::Same<int*, decltype(__stl2::begin(__stl2::declval<D&>()))>());
 	static_assert(can_begin<const D&>);
-	static_assert(models::Same<const int*, decltype(__stl2::begin(__stl2::declval<const D&>()))>);
+	static_assert(ranges::Same<const int*, decltype(__stl2::begin(__stl2::declval<const D&>()))>());
 
 	{
 		using T = std::initializer_list<int>;
 		// Valid: begin accepts lvalue initializer_list
-		static_assert(models::Same<const int*, decltype(__stl2::begin(__stl2::declval<T&>()))>);
-		static_assert(models::Same<const int*, decltype(__stl2::begin(__stl2::declval<const T&>()))>);
+		static_assert(ranges::Same<const int*, decltype(__stl2::begin(__stl2::declval<T&>()))>());
+		static_assert(ranges::Same<const int*, decltype(__stl2::begin(__stl2::declval<const T&>()))>());
 	}
 }
 } // namespace begin_testing
@@ -161,8 +161,8 @@ constexpr const T* end(const array<T, N>& a) noexcept { return a.elements_ + N; 
 
 using I = int*;
 using CI = const int*;
-static_assert(__stl2::models::Iterator<I>);
-static_assert(__stl2::models::Iterator<CI>);
+static_assert(__stl2::Iterator<I>());
+static_assert(__stl2::Iterator<CI>());
 
 int main() {
 	using namespace __stl2;
@@ -171,8 +171,8 @@ int main() {
 
 	constexpr auto first = begin(some_ints);
 	constexpr auto last = end(some_ints);
-	static_assert(models::Same<const CI, decltype(first)>);
-	static_assert(models::Same<const CI, decltype(last)>);
+	static_assert(Same<const CI, decltype(first)>());
+	static_assert(Same<const CI, decltype(last)>());
 	static_assert(first == cbegin(some_ints));
 	static_assert(last == cend(some_ints));
 

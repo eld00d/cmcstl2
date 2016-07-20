@@ -22,28 +22,15 @@ STL2_OPEN_NAMESPACE {
 	///////////////////////////////////////////////////////////////////////////
 	// Addressable [Extension]
 	//
-	template <class>
-	constexpr bool __addressable = false;
-	template <class T>
-		requires requires (T& t, const T& ct) {
-			STL2_EXACT_TYPE_CONSTRAINT(&t, T*);
-			STL2_EXACT_TYPE_CONSTRAINT(&ct, const T*);
-			// Axiom: &ct == addressof(ct)
-		}
-	constexpr bool __addressable<T> = true;
-
 	namespace ext {
 		template <class T>
 		concept bool Addressable() {
-			return __addressable<T>;
+			return requires (T& t, const T& ct) {
+				STL2_EXACT_TYPE_CONSTRAINT(&t, T*);
+				STL2_EXACT_TYPE_CONSTRAINT(&ct, const T*);
+				// Axiom: &ct == addressof(ct)
+			};
 		}
-	}
-
-	namespace models {
-		template <class>
-		constexpr bool Addressable = false;
-		__stl2::ext::Addressable{T}
-		constexpr bool Addressable<T> = true;
 	}
 
 	namespace detail {
@@ -68,29 +55,17 @@ STL2_OPEN_NAMESPACE {
 	//              necessary to prevent hard errors in the requires clause
 	//              with odd types.
 	//
-	template <class>
-	constexpr bool __destructible = false;
 	template <class T>
-		requires _Is<T, is_object> &&
+	concept bool Destructible() {
+		return ext::Addressable<T>() &&
+			_Is<T, is_object> &&
 			_IsNot<T, is_array> &&
 			detail::MustBeComplete<T>() &&
 			requires (T& t, T* const p) {
 				{ t.~T() } noexcept;
 				delete p;
 				delete[] p;
-			}
-	constexpr bool __destructible<T> = true;
-
-	template <class T>
-	concept bool Destructible() {
-		return ext::Addressable<T>() && __destructible<T>;
-	}
-
-	namespace models {
-		template <class>
-		constexpr bool Destructible = false;
-		__stl2::Destructible{T}
-		constexpr bool Destructible<T> = true;
+			};
 	}
 
 	///////////////////////////////////////////////////////////////////////////
@@ -99,17 +74,14 @@ STL2_OPEN_NAMESPACE {
 	//
 	namespace ext {
 		template <class T, class...Args>
-		constexpr bool __constructible_object = false;
-		template <class T, class...Args>
-			requires requires (Args&&...args) {
-				T{ (Args&&)args... };
-				new T{ (Args&&)args... };
-			}
-		constexpr bool __constructible_object<T, Args...> = true;
+		concept bool ConstructibleObject2 = requires (Args&&...args) {
+			T{ (Args&&)args... };
+			new T{ (Args&&)args... };
+		};
 
 		template <class T, class...Args>
 		concept bool ConstructibleObject =
-			Destructible<T>() && __constructible_object<T, Args...>;
+			Destructible<T>() && ConstructibleObject2<T, Args...>;
 
 		// 20150718: Not to spec: spec is broken.
 		// FIXME: Correct wording.
@@ -121,26 +93,14 @@ STL2_OPEN_NAMESPACE {
 			_Is<T, is_constructible, Args...>;
 	}
 
-	namespace models {
-		template <class T, class...Args>
-		constexpr bool ConstructibleObject = false;
-		__stl2::ext::ConstructibleObject{T, ...Args}
-		constexpr bool ConstructibleObject<T, Args...> = true;
-
-		template <class T, class...Args>
-		constexpr bool BindableReference = false;
-		__stl2::ext::BindableReference{T, ...Args}
-		constexpr bool BindableReference<T, Args...> = true;
-
-		template <class T, class...Args>
-		constexpr bool Constructible =
-			ConstructibleObject<T, Args...> ||
-			BindableReference<T, Args...>;
-	}
+	template <class T, class...Args>
+	constexpr bool __constructible =
+		ext::ConstructibleObject<T, Args...> ||
+		ext::BindableReference<T, Args...>;
 
 	template <class T, class...Args>
 	concept bool Constructible() {
-		return models::Constructible<T, Args...>;
+		return __constructible<T, Args...>;
 	}
 
 	///////////////////////////////////////////////////////////////////////////
@@ -149,23 +109,10 @@ STL2_OPEN_NAMESPACE {
 	// enforce the requirement that the default constructor be non-explicit.
 	//
 	template <class T>
-	constexpr bool __default_constructible = false;
-	template <class T>
-		requires requires (const std::size_t n) {
-			new T[n]{}; // not required to be equality preserving
-		}
-	constexpr bool __default_constructible<T> = true;
-
-	template <class T>
 	concept bool DefaultConstructible() {
-		return Constructible<T>() && __default_constructible<T>;
-	}
-
-	namespace models {
-		template <class>
-		constexpr bool DefaultConstructible = false;
-		__stl2::DefaultConstructible{T}
-		constexpr bool DefaultConstructible<T> = true;
+		return Constructible<T>() && requires (const std::size_t n) {
+			new T[n]{}; // not required to be equality preserving
+		};
 	}
 
 	///////////////////////////////////////////////////////////////////////////
@@ -173,15 +120,8 @@ STL2_OPEN_NAMESPACE {
 	//
 	template <class T>
 	concept bool MoveConstructible() {
-		return Constructible<T, remove_cv_t<T>&&>() &&
-			ext::ImplicitlyConvertibleTo<remove_cv_t<T>&&, T>();
-	}
-
-	namespace models {
-		template <class>
-		constexpr bool MoveConstructible = false;
-		__stl2::MoveConstructible{T}
-		constexpr bool MoveConstructible<T> = true;
+		return Constructible<T, remove_cv_t<T>>() &&
+			ext::ImplicitlyConvertibleTo<remove_cv_t<T>, T>();
 	}
 } STL2_CLOSE_NAMESPACE
 

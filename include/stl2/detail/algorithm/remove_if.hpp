@@ -24,9 +24,8 @@
 STL2_OPEN_NAMESPACE {
 	template <ForwardIterator I, Sentinel<I> S, class Pred, class Proj = identity>
 	requires
-		models::Permutable<I> &&
-		models::IndirectCallablePredicate<
-			__f<Pred>, projected<I, __f<Proj>>>
+		Permutable<I>() &&
+		IndirectCallablePredicate<__f<Pred>, projected<I, __f<Proj>>>()
 	I remove_if(I first, S last, Pred&& pred_, Proj&& proj_ = Proj{})
 	{
 		auto pred = ext::make_callable_wrapper(__stl2::forward<Pred>(pred_));
@@ -46,9 +45,8 @@ STL2_OPEN_NAMESPACE {
 
 	template <ForwardRange Rng, class Pred, class Proj = identity>
 	requires
-		models::Permutable<iterator_t<Rng>> &&
-		models::IndirectCallablePredicate<
-			__f<Pred>, projected<iterator_t<Rng>, __f<Proj>>>
+		Permutable<iterator_t<Rng>>() &&
+		IndirectCallablePredicate<__f<Pred>, projected<iterator_t<Rng>, __f<Proj>>>()
 	safe_iterator_t<Rng>
 	remove_if(Rng&& rng, Pred&& pred, Proj&& proj = Proj{})
 	{

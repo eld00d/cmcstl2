@@ -33,8 +33,7 @@
 STL2_OPEN_NAMESPACE {
 	template <InputIterator I, Sentinel<I> S, class F, class Proj = identity>
 	requires
-		models::Callable<
-			__f<F>, reference_t<projected<I, __f<Proj>>>>
+		Callable<__f<F>, reference_t<projected<I, __f<Proj>>>>()
 	tagged_pair<tag::in(I), tag::fun(__f<F>)>
 	for_each(I first, S last, F&& fun_, Proj&& proj_ = Proj{})
 	{
@@ -48,8 +47,7 @@ STL2_OPEN_NAMESPACE {
 
 	template <InputRange Rng, class F, class Proj = identity>
 	requires
-		models::Callable<
-			__f<F>, reference_t<projected<iterator_t<Rng>, __f<Proj>>>>
+		Callable<__f<F>, reference_t<projected<iterator_t<Rng>, __f<Proj>>>>()
 	tagged_pair<tag::in(safe_iterator_t<Rng>), tag::fun(__f<F>)>
 	for_each(Rng&& rng, F&& f, Proj&& proj = Proj{})
 	{
@@ -60,8 +58,7 @@ STL2_OPEN_NAMESPACE {
 	// Extension
 	template <class E, class F, class Proj = identity>
 	requires
-		models::Callable<
-			__f<F>, reference_t<projected<const E*, __f<Proj>>>>
+		Callable<__f<F>, reference_t<projected<const E*, __f<Proj>>>>()
 	tagged_pair<tag::in(dangling<const E*>), tag::fun(__f<F>)>
 	for_each(std::initializer_list<E>&& il, F&& f, Proj&& proj = Proj{})
 	{

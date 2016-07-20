@@ -175,11 +175,11 @@ STL2_OPEN_NAMESPACE {
 		}
 	private:
 		constexpr Derived& derived() noexcept {
-			static_assert(models::DerivedFrom<Derived, tag_specifier_base>);
+			static_assert(DerivedFrom<Derived, tag_specifier_base>());
 			return static_cast<Derived&>(*this);
 		}
 		constexpr const Derived& derived() const noexcept {
-			static_assert(models::DerivedFrom<Derived, tag_specifier_base>);
+			static_assert(DerivedFrom<Derived, tag_specifier_base>());
 			return static_cast<const Derived&>(*this);
 		}
 	};

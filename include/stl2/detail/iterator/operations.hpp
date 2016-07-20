@@ -24,8 +24,8 @@ STL2_OPEN_NAMESPACE {
 	namespace __advance {
 		template <class I>
 		requires
-			models::Iterator<I>
-			// Pre: 0 <= n && [i,i+n)
+			Iterator<I>()
+		// Pre: 0 <= n && [i,i+n)
 		constexpr void impl(I& i, difference_type_t<I> n) {
 			STL2_ASSUME(0 <= n);
 			while (n != 0) {
@@ -36,13 +36,13 @@ STL2_OPEN_NAMESPACE {
 	}
 
 	Iterator{I}
-		// Pre: 0 <= n && [i,i+n)
+	// Pre: 0 <= n && [i,i+n)
 	STL2_CONSTEXPR_EXT void advance(I& i, difference_type_t<I> n) {
 		__advance::impl(i, n);
 	}
 
 	BidirectionalIterator{I}
-		// Pre: 0 <= n ? [i,i+n) : [i+n,i)
+	// Pre: 0 <= n ? [i,i+n) : [i+n,i)
 	STL2_CONSTEXPR_EXT void advance(I& i, difference_type_t<I> n) {
 		if (0 <= n) {
 			__advance::impl(i, n);
@@ -55,15 +55,15 @@ STL2_OPEN_NAMESPACE {
 	}
 
 	RandomAccessIterator{I}
-		// Pre: 0 <= n ? [i,i+n) : [i+n,i)
+	// Pre: 0 <= n ? [i,i+n) : [i+n,i)
 	STL2_CONSTEXPR_EXT void advance(I& i, difference_type_t<I> n) {
 		i += n;
 	}
 
 	template <class I, class S>
 	requires
-		models::Sentinel<S, I>
-		// Pre: [i,bound)
+		Sentinel<S, I>()
+	// Pre: [i,bound)
 	STL2_CONSTEXPR_EXT void advance(I& i, S bound) {
 		while (i != bound) {
 			++i;
@@ -72,18 +72,15 @@ STL2_OPEN_NAMESPACE {
 
 	template <class I, class S>
 	requires
-		models::Sentinel<S, I> &&
-		models::Assignable<I&, S&&>
+		Sentinel<S, I>() && Assignable<I&, S&&>()
 	STL2_CONSTEXPR_EXT void advance(I& i, S bound) {
 		i = __stl2::move(bound);
 	}
 
 	template <class I, class S>
 	requires
-		models::Sentinel<S, I> &&
-		!models::Assignable<I&, S&&> &&
-		models::SizedSentinel<S, I>
-		// Pre: [i,bound)
+		Sentinel<S, I>() && !Assignable<I&, S&&>() && SizedSentinel<S, I>()
+	// Pre: [i,bound)
 	STL2_CONSTEXPR_EXT void advance(I& i, S bound) {
 		difference_type_t<I> d = bound - i;
 		STL2_ASSUME(0 <= d);
@@ -93,8 +90,8 @@ STL2_OPEN_NAMESPACE {
 	namespace __advance {
 		template <class I, class S>
 		requires
-			models::Sentinel<S, I>
-			// Pre: 0 == n || (0 < n && [i,bound))
+			Sentinel<S, I>()
+		// Pre: 0 == n || (0 < n && [i,bound))
 		constexpr difference_type_t<I>
 		impl(I& i, difference_type_t<I> n, const S& bound) {
 			STL2_ASSUME(0 <= n);
@@ -108,8 +105,8 @@ STL2_OPEN_NAMESPACE {
 
 	template <class I, class S>
 	requires
-		models::Sentinel<S, I>
-		// Pre: 0 == n || (0 < n && [i,bound))
+		Sentinel<S, I>()
+	// Pre: 0 == n || (0 < n && [i,bound))
 	STL2_CONSTEXPR_EXT difference_type_t<I>
 	advance(I& i, difference_type_t<I> n, S bound) {
 		return __advance::impl(i, n, bound);
@@ -117,9 +114,8 @@ STL2_OPEN_NAMESPACE {
 
 	template <class I, class S>
 	requires
-		models::Sentinel<S, I> &&
-		models::SizedSentinel<S, I>
-		// Pre: 0 <= n && [i,bound)
+		Sentinel<S, I>() && SizedSentinel<S, I>()
+	// Pre: 0 <= n && [i,bound)
 	STL2_CONSTEXPR_EXT difference_type_t<I>
 	advance(I& i, difference_type_t<I> n, S bound) {
 		STL2_ASSUME(0 <= n);
@@ -135,8 +131,8 @@ STL2_OPEN_NAMESPACE {
 
 	template <class I>
 	requires
-		models::BidirectionalIterator<I>
-		// Pre: 0 == n || (0 < n ? [i,bound) : [bound,i))
+		BidirectionalIterator<I>()
+	// Pre: 0 == n || (0 < n ? [i,bound) : [bound,i))
 	STL2_CONSTEXPR_EXT difference_type_t<I>
 	advance(I& i, difference_type_t<I> n, I bound) {
 		if (0 <= n) {
@@ -152,9 +148,8 @@ STL2_OPEN_NAMESPACE {
 
 	template <class I>
 	requires
-		models::BidirectionalIterator<I> &&
-		models::SizedSentinel<I, I>
-		// Pre: 0 == n ? ([i,bound) || [bound,i)) : (0 < n ? [i,bound) : [bound,i))
+		BidirectionalIterator<I>() && SizedSentinel<I, I>()
+	// Pre: 0 == n ? ([i,bound) || [bound,i)) : (0 < n ? [i,bound) : [bound,i))
 	STL2_CONSTEXPR_EXT difference_type_t<I>
 	advance(I& i, difference_type_t<I> n, I bound) {
 		auto d = difference_type_t<I>{bound - i};
@@ -176,7 +171,7 @@ STL2_OPEN_NAMESPACE {
 
 	template <class S, class I>
 	requires
-		models::Sentinel<__f<S>, I>
+		Sentinel<__f<S>, I>()
 	STL2_CONSTEXPR_EXT I next(I x, S&& bound) {
 		__stl2::advance(x, __stl2::forward<S>(bound));
 		return x;
@@ -184,7 +179,7 @@ STL2_OPEN_NAMESPACE {
 
 	template <class S, class I>
 	requires
-		models::Sentinel<__f<S>, I>
+		Sentinel<__f<S>, I>()
 	STL2_CONSTEXPR_EXT I next(I x, difference_type_t<I> n, S&& bound) {
 		__stl2::advance(x, n, __stl2::forward<S>(bound));
 		return x;
@@ -199,7 +194,7 @@ STL2_OPEN_NAMESPACE {
 
 	template <BidirectionalIterator I, class S>
 	requires
-		models::Sentinel<__f<S>, I>
+		Sentinel<__f<S>, I>()
 	STL2_CONSTEXPR_EXT I prev(I x, difference_type_t<I> n, S&& bound) {
 		__stl2::advance(x, -n, __stl2::forward<S>(bound));
 		return x;
@@ -221,15 +216,13 @@ STL2_OPEN_NAMESPACE {
 		STL2_CONSTEXPR_EXT tagged_pair<tag::count(difference_type_t<I>), tag::end(I)>
 		enumerate(I first, S last) {
 			auto d = last - first;
-			STL2_ASSUME((models::Same<I, S> || d >= 0));
+			STL2_ASSUME((Same<I, S>() || d >= 0));
 			return {d, __stl2::next(__stl2::move(first), __stl2::move(last))};
 		}
 
 		template <class S, class I>
 		requires
-			Sentinel<S, I>() &&
-			!SizedSentinel<S, I>() &&
-			SizedSentinel<I, I>()
+			Sentinel<S, I>() && !SizedSentinel<S, I>() && SizedSentinel<I, I>()
 		STL2_CONSTEXPR_EXT tagged_pair<tag::count(difference_type_t<I>), tag::end(I)>
 		enumerate(I first, S last) {
 			auto end = __stl2::next(first, __stl2::move(last));
@@ -240,13 +233,13 @@ STL2_OPEN_NAMESPACE {
 
 	// distance
 	Sentinel{S, I}
-		// Pre: [first, last)
+	// Pre: [first, last)
 	STL2_CONSTEXPR_EXT difference_type_t<I> distance(I first, S last) {
 		return ext::enumerate(__stl2::move(first), __stl2::move(last)).first;
 	}
 
 	SizedSentinel{S, I}
-		// Pre: [first, last)
+	// Pre: [first, last)
 	STL2_CONSTEXPR_EXT difference_type_t<I> distance(I first, S last) {
 		auto d = last - first;
 		STL2_ASSUME(d >= 0);
@@ -256,7 +249,7 @@ STL2_OPEN_NAMESPACE {
 	template <class I>
 	requires
 		SizedSentinel<I, I>()
-		// Pre: [first, last) || [last, first)
+	// Pre: [first, last) || [last, first)
 	STL2_CONSTEXPR_EXT difference_type_t<I> distance(I first, I last) {
 		return last - first;
 	}

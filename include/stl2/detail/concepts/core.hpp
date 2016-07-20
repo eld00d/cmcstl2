@@ -20,13 +20,13 @@
 // Core Concepts [concepts.lib.corelang]
 //
 STL2_OPEN_NAMESPACE {
-	template <template <class...> class T, class...U>
+	template <template <class...> class T, class... U>
 	concept bool _Valid = requires { typename T<U...>; };
 
-	template <class U, template <class...> class T, class...V>
+	template <class U, template <class...> class T, class... V>
 	concept bool _Is = _Valid<T, U, V...> && T<U, V...>::value;
 
-	template <class U, template <class...> class T, class...V>
+	template <class U, template <class...> class T, class... V>
 	concept bool _IsNot = !_Is<U, T, V...>;
 
 	// U is a cv/ref-qualified specialization of class template T.
@@ -37,21 +37,19 @@ STL2_OPEN_NAMESPACE {
 	// Same [concepts.lib.corelang.same]
 	// Extension: variadic.
 	//
-	namespace models {
-		template <class...>
-		constexpr bool Same = true;
-		template <class T, class...Rest>
-		constexpr bool Same<T, Rest...> =
+	template <class...>
+	constexpr bool __same = true;
+	template <class T, class...Rest>
+	constexpr bool __same<T, Rest...> =
 #if defined(__GNUC__)
-			(true && ... && __is_same_as(T, Rest));
+		(true && ... && __is_same_as(T, Rest));
 #else
-			(true && ... && is_same<T, Rest>::value);
+		(true && ... && is_same<T, Rest>::value);
 #endif
-	}
 
 	template <class...Ts>
 	concept bool Same() {
-		return models::Same<Ts...>;
+		return __same<Ts...>;
 	}
 
 	template <class T>
@@ -72,28 +70,13 @@ STL2_OPEN_NAMESPACE {
 #endif
 	}
 
-	namespace models {
-		template <class, class>
-		constexpr bool DerivedFrom = false;
-		__stl2::DerivedFrom{T, U}
-		constexpr bool DerivedFrom<T, U> = true;
-	}
-
 	///////////////////////////////////////////////////////////////////////////
 	// ExplicitlyConvertibleTo [Extension]
 	//
-	namespace models {
-		template <class, class>
-		constexpr bool ExplicitlyConvertibleTo = false;
-		template <class T, class U>
-			requires requires (T (&t)()) { static_cast<U>(t()); }
-		constexpr bool ExplicitlyConvertibleTo<T, U> = true;
-	}
-
 	namespace ext {
 		template <class T, class U>
 		concept bool ExplicitlyConvertibleTo() {
-			return models::ExplicitlyConvertibleTo<T, U>;
+			return requires (T (&t)()) { static_cast<U>(t()); };
 		}
 	}
 
@@ -105,17 +88,10 @@ STL2_OPEN_NAMESPACE {
 		template <class T, class U>
 		concept bool ImplicitlyConvertibleTo() {
 			// Q: Why not { t } -> U ?
-			// A: They do not have equivalent results as of 20150724,
-			//    which I think is a bug.
+			// A: They do not have equivalent results as of 20150724, which is
+			//    likely a bug.
 			return _Is<T, is_convertible, U>;
 		}
-	}
-
-	namespace models {
-		template <class, class>
-		constexpr bool ImplicitlyConvertibleTo = false;
-		__stl2::ext::ImplicitlyConvertibleTo{T, U}
-		constexpr bool ImplicitlyConvertibleTo<T, U> = true;
 	}
 
 	///////////////////////////////////////////////////////////////////////////
@@ -130,13 +106,6 @@ STL2_OPEN_NAMESPACE {
 		// Axiom: implicit and explicit conversion have equal results.
 	}
 
-	namespace models {
-		template <class, class>
-		constexpr bool ConvertibleTo = false;
-		__stl2::ConvertibleTo{T, U}
-		constexpr bool ConvertibleTo<T, U> = true;
-	}
-
 	///////////////////////////////////////////////////////////////////////////
 	// PubliclyDerivedFrom [Extension]
 	//
@@ -145,13 +114,6 @@ STL2_OPEN_NAMESPACE {
 		concept bool PubliclyDerivedFrom() {
 			return ConvertibleTo<T, U>() && (Same<T, U>() || DerivedFrom<T, U>());
 		}
-	}
-
-	namespace models {
-		template <class, class>
-		constexpr bool PubliclyDerivedFrom = false;
-		__stl2::ext::PubliclyDerivedFrom{T, U}
-		constexpr bool PubliclyDerivedFrom<T, U> = true;
 	}
 } STL2_CLOSE_NAMESPACE
 

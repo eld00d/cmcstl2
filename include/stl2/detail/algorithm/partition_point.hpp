@@ -35,8 +35,7 @@ STL2_OPEN_NAMESPACE {
 	namespace ext {
 		template <ForwardIterator I, class Pred, class Proj = identity>
 		requires
-			models::IndirectCallablePredicate<
-				__f<Pred>, projected<I, __f<Proj>>>
+			IndirectCallablePredicate<__f<Pred>, projected<I, __f<Proj>>>()
 		I partition_point_n(I first, difference_type_t<I> n,
 			Pred&& pred_, Proj&& proj_ = Proj{})
 		{
@@ -61,8 +60,7 @@ STL2_OPEN_NAMESPACE {
 
 	template <ForwardIterator I, Sentinel<I> S, class Pred, class Proj = identity>
 	requires
-		models::IndirectCallablePredicate<
-			__f<Pred>, projected<I, __f<Proj>>>
+		IndirectCallablePredicate<__f<Pred>, projected<I, __f<Proj>>>()
 	I partition_point(I first, S last, Pred&& pred_, Proj&& proj_ = Proj{})
 	{
 		auto pred = ext::make_callable_wrapper(__stl2::forward<Pred>(pred_));
@@ -86,9 +84,8 @@ STL2_OPEN_NAMESPACE {
 
 	template <ForwardIterator I, Sentinel<I> S, class Pred, class Proj = identity>
 	requires
-		models::SizedSentinel<S, I> &&
-		models::IndirectCallablePredicate<
-			__f<Pred>, projected<I, __f<Proj>>>
+		SizedSentinel<S, I>() &&
+		IndirectCallablePredicate<__f<Pred>, projected<I, __f<Proj>>>()
 	I partition_point(I first, S last, Pred&& pred, Proj&& proj = Proj{})
 	{
 		auto n = __stl2::distance(first, __stl2::move(last));
@@ -98,8 +95,7 @@ STL2_OPEN_NAMESPACE {
 
 	template <ForwardRange Rng, class Pred, class Proj = identity>
 	requires
-		models::IndirectCallablePredicate<
-			__f<Pred>, projected<iterator_t<Rng>, __f<Proj>>>
+		IndirectCallablePredicate<__f<Pred>, projected<iterator_t<Rng>, __f<Proj>>>()
 	safe_iterator_t<Rng>
 	partition_point(Rng&& rng, Pred&& pred, Proj&& proj = Proj{})
 	{
@@ -109,9 +105,8 @@ STL2_OPEN_NAMESPACE {
 
 	template <ForwardRange Rng, class Pred, class Proj = identity>
 	requires
-		models::SizedRange<Rng> &&
-		models::IndirectCallablePredicate<
-			__f<Pred>, projected<iterator_t<Rng>, __f<Proj>>>
+		SizedRange<Rng>() &&
+		IndirectCallablePredicate<__f<Pred>, projected<iterator_t<Rng>, __f<Proj>>>()
 	safe_iterator_t<Rng>
 	partition_point(Rng&& rng, Pred&& pred, Proj&& proj = Proj{})
 	{
@@ -122,8 +117,7 @@ STL2_OPEN_NAMESPACE {
 	// Extension
 	template <class E, class Pred, class Proj = identity>
 	requires
-		models::IndirectCallablePredicate<
-			__f<Pred>, projected<const E*, __f<Proj>>>
+		IndirectCallablePredicate<__f<Pred>, projected<const E*, __f<Proj>>>()
 	dangling<const E*>
 	partition_point(std::initializer_list<E>&& rng, Pred&& pred, Proj&& proj = Proj{})
 	{

@@ -26,7 +26,7 @@ STL2_OPEN_NAMESPACE {
 	//
 	template <class T, class U = T>
 	requires
-		models::MoveConstructible<T> && models::Assignable<T&, U>
+		MoveConstructible<T>() && Assignable<T&, U>()
 	STL2_CONSTEXPR_EXT T exchange(T& t, U&& u)
 	noexcept(is_nothrow_move_constructible<T>::value &&
 		is_nothrow_assignable<T&, U>::value)
@@ -77,16 +77,15 @@ STL2_OPEN_NAMESPACE {
 			)
 			template <class T>
 			requires
-				!has_customization<T&, T&> && models::MoveConstructible<T> &&
-				models::Assignable<T&, T&&>
+				!has_customization<T&, T&> && MoveConstructible<T>() &&
+				Assignable<T&, T&&>()
 			constexpr void operator()(T& a, T& b) const
 			STL2_NOEXCEPT_RETURN(
 				(void)(b = __stl2::exchange(a, __stl2::move(b)))
 			)
 			template <class T, class U, std::size_t N, class F = fn>
 			requires
-				!has_customization<T(&)[N], U(&)[N]> &&
-				has_operator<F, T, U>
+				!has_customization<T(&)[N], U(&)[N]> && has_operator<F, T, U>
 			constexpr void operator()(T (&t)[N], U (&u)[N]) const
 			noexcept(noexcept(declval<const F&>()(t[0], u[0])))
 			{
@@ -105,13 +104,9 @@ STL2_OPEN_NAMESPACE {
 	// Swappable [concepts.lib.corelang.swappable]
 	//
 	template <class T, class U>
-	constexpr bool __swappable = false;
-	template <class T, class U>
-	requires
-		requires (T&& t, U&&u) {
-			__stl2::swap((T&&)t, (U&&)u);
-		}
-	constexpr bool __swappable<T, U> = true;
+	concept bool __swappable = requires (T&& t, U&&u) {
+		__stl2::swap((T&&)t, (U&&)u);
+	};
 
 	template <class T>
 	concept bool Swappable() {
@@ -125,15 +120,6 @@ STL2_OPEN_NAMESPACE {
 			CommonReference<const T&, const U&>() &&
 			__swappable<T, U> &&
 			__swappable<U, T>;
-	}
-
-	namespace models {
-		template <class T, class U = T>
-		constexpr bool Swappable = false;
-		__stl2::Swappable{T}
-		constexpr bool Swappable<T, T> = true;
-		__stl2::Swappable{T, U}
-		constexpr bool Swappable<T, U> = true;
 	}
 
 	template <class T, class U>

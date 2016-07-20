@@ -33,10 +33,10 @@ STL2_OPEN_NAMESPACE {
 		class Comp = less<>,
 		class Proj1 = identity, class Proj2 = identity>
 	requires
-		models::IndirectlyCopyable<I1, I2> &&
-		models::Sortable<I2, __f<Comp>, __f<Proj2>> &&
-		models::IndirectCallableStrictWeakOrder<
-			__f<Comp>, projected<I1, __f<Proj1>>, projected<I2, __f<Proj2>>>
+		IndirectlyCopyable<I1, I2>() &&
+		Sortable<I2, __f<Comp>, __f<Proj2>>() &&
+		IndirectCallableStrictWeakOrder<
+			__f<Comp>, projected<I1, __f<Proj1>>, projected<I2, __f<Proj2>>>()
 	I2 partial_sort_copy(I1 first, S1 last, I2 result_first, S2 result_last,
 		Comp&& comp_ = Comp{}, Proj1&& proj1_ = Proj1{}, Proj2&& proj2_ = Proj2{})
 	{
@@ -67,11 +67,11 @@ STL2_OPEN_NAMESPACE {
 	template <InputRange Rng1, RandomAccessRange Rng2, class Comp = less<>,
 		class Proj1 = identity, class Proj2 = identity>
 	requires
-		models::IndirectlyCopyable<iterator_t<Rng1>, iterator_t<Rng2>> &&
-		models::Sortable<iterator_t<Rng2>, __f<Comp>, __f<Proj2>> &&
-		models::IndirectCallableStrictWeakOrder<__f<Comp>,
+		IndirectlyCopyable<iterator_t<Rng1>, iterator_t<Rng2>>() &&
+		Sortable<iterator_t<Rng2>, __f<Comp>, __f<Proj2>>() &&
+		IndirectCallableStrictWeakOrder<__f<Comp>,
 			projected<iterator_t<Rng1>, __f<Proj1>>,
-			projected<iterator_t<Rng2>, __f<Proj2>>>
+			projected<iterator_t<Rng2>, __f<Proj2>>>()
 	safe_iterator_t<Rng2>
 	partial_sort_copy(Rng1&& rng, Rng2&& result_rng, Comp&& comp = Comp{},
 		Proj1&& proj1 = Proj1{}, Proj2&& proj2 = Proj2{})
@@ -87,11 +87,11 @@ STL2_OPEN_NAMESPACE {
 	template <class E, RandomAccessRange Rng2, class Comp = less<>,
 		class Proj1 = identity, class Proj2 = identity>
 	requires
-		models::IndirectlyCopyable<const E*, iterator_t<Rng2>> &&
-		models::Sortable<iterator_t<Rng2>, __f<Comp>, __f<Proj2>> &&
-		models::IndirectCallableStrictWeakOrder<__f<Comp>,
+		IndirectlyCopyable<const E*, iterator_t<Rng2>>() &&
+		Sortable<iterator_t<Rng2>, __f<Comp>, __f<Proj2>>() &&
+		IndirectCallableStrictWeakOrder<__f<Comp>,
 			projected<const E*, __f<Proj1>>,
-			projected<iterator_t<Rng2>, __f<Proj2>>>
+			projected<iterator_t<Rng2>, __f<Proj2>>>()
 	safe_iterator_t<Rng2>
 	partial_sort_copy(std::initializer_list<E>&& rng,
 		Rng2&& result_rng, Comp&& comp = Comp{},

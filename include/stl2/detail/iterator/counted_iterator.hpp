@@ -44,8 +44,8 @@ STL2_OPEN_NAMESPACE {
 		InputIterator{I}
 		struct adaptor_box<I> : protected detail::ebo_box<I> {
 			using value_type = value_type_t<I>;
-			using single_pass = meta::bool_<!models::ForwardIterator<I>>;
-			using contiguous = meta::bool_<models::ContiguousIterator<I>>;
+			using single_pass = meta::bool_<!ForwardIterator<I>()>;
+			using contiguous = meta::bool_<ext::ContiguousIterator<I>()>;
 
 			adaptor_box() = default;
 			using detail::ebo_box<I>::ebo_box;
@@ -204,7 +204,7 @@ STL2_OPEN_NAMESPACE {
 
 	template <class I>
 	requires
-		models::Iterator<__f<I>>
+		Iterator<__f<I>>()
 	STL2_CONSTEXPR_EXT auto make_counted_iterator(I&& i, difference_type_t<__f<I>> n)
 	STL2_NOEXCEPT_RETURN(
 		counted_iterator<__f<I>>{__stl2::forward<I>(i), n}
@@ -259,8 +259,7 @@ STL2_OPEN_NAMESPACE {
 			const counted_iterator<I>& o, I i, difference_type_t<I> n)
 		noexcept(noexcept(counted_iterator<I>{__stl2::move(i), o.count() - n}))
 		{
-			STL2_EXPENSIVE_ASSERT(!models::ForwardIterator<I> ||
-				i == __stl2::next(o.base(), n));
+			STL2_EXPENSIVE_ASSERT(!ForwardIterator<I>() || i == __stl2::next(o.base(), n));
 			return counted_iterator<I>{__stl2::move(i), o.count() - n};
 		}
 	}

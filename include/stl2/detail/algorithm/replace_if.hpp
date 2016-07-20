@@ -23,9 +23,8 @@ STL2_OPEN_NAMESPACE {
 	// Extension: Relax to InputIterator
 	template<InputIterator I, Sentinel<I> S, class Pred, class T, class Proj = identity>
 	requires
-		models::Writable<I, const T&> &&
-		models::IndirectCallablePredicate<
-			__f<Pred>, projected<I, __f<Proj>>>
+		Writable<I, const T&>() &&
+		IndirectCallablePredicate<__f<Pred>, projected<I, __f<Proj>>>()
 	I replace_if(I first, S last, Pred&& pred_, const T& new_value, Proj&& proj_ = Proj{})
 	{
 		if (first != last) {
@@ -43,9 +42,9 @@ STL2_OPEN_NAMESPACE {
 	// Extension: Relax to InputRange
 	template<InputRange Rng, class Pred, class T, class Proj = identity>
 	requires
-		models::Writable<iterator_t<Rng>, const T&> &&
-		models::IndirectCallablePredicate<
-			__f<Pred>, projected<iterator_t<Rng>, __f<Proj>>>
+		Writable<iterator_t<Rng>, const T&>() &&
+		IndirectCallablePredicate<
+			__f<Pred>, projected<iterator_t<Rng>, __f<Proj>>>()
 	safe_iterator_t<Rng> replace_if(Rng&& rng, Pred&& pred, const T& new_value,
 		Proj&& proj = Proj{})
 	{

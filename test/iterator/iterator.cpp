@@ -19,8 +19,6 @@
 
 #include "../simple_test.hpp"
 
-namespace models = ::__stl2::models;
-
 template <class T>
 struct reference_wrapper {
 	__stl2::detail::raw_ptr<T> ptr_;
@@ -227,52 +225,52 @@ arbitrary_iterator<C, B, R> operator+(
 
 void test_iterator_dispatch() {
 	CHECK(iterator_dispatch<void>() == category::none);
-	static_assert(models::ContiguousIterator<int*>);
+	static_assert(__stl2::ext::ContiguousIterator<int*>());
 	CHECK(iterator_dispatch<int*>() == category::contiguous);
 
 	{
 		using I = arbitrary_iterator<__stl2::input_iterator_tag, false>;
-		static_assert(models::InputIterator<I>);
+		static_assert(__stl2::InputIterator<I>());
 		CHECK(iterator_dispatch<I>() == category::input);
 	}
 	{
 		using I = arbitrary_iterator<__stl2::input_iterator_tag, true>;
-		static_assert(models::InputIterator<I>);
-		static_assert(models::EqualityComparable<I>);
+		static_assert(__stl2::InputIterator<I>());
+		static_assert(__stl2::EqualityComparable<I>());
 		CHECK(iterator_dispatch<I>() == category::input);
 	}
 	{
 		using I = arbitrary_iterator<__stl2::forward_iterator_tag, true>;
-		static_assert(models::ForwardIterator<I>);
+		static_assert(__stl2::ForwardIterator<I>());
 		CHECK(iterator_dispatch<I>() == category::forward);
 	}
 	{
 		using I = arbitrary_iterator<__stl2::bidirectional_iterator_tag, true>;
-		static_assert(models::BidirectionalIterator<I>);
+		static_assert(__stl2::BidirectionalIterator<I>());
 		CHECK(iterator_dispatch<I>() == category::bidirectional);
 	}
 	{
 		using I = arbitrary_iterator<__stl2::random_access_iterator_tag, true>;
-		static_assert(models::RandomAccessIterator<I>);
+		static_assert(__stl2::RandomAccessIterator<I>());
 		CHECK(iterator_dispatch<I>() == category::random_access);
 	}
 	{
 		using I = arbitrary_iterator<__stl2::ext::contiguous_iterator_tag, true>;
-		static_assert(models::ContiguousIterator<I>);
+		static_assert(__stl2::ext::ContiguousIterator<I>());
 		CHECK(iterator_dispatch<I>() == category::contiguous);
 	}
 
 	{
 		using I = arbitrary_iterator<void, false>;
-		static_assert(models::OutputIterator<I, const int&>);
-		static_assert(!models::InputIterator<I>);
+		static_assert(__stl2::OutputIterator<I, const int&>());
+		static_assert(!__stl2::InputIterator<I>());
 		CHECK(iterator_dispatch<I>() == category::output);
 	}
 	{
 		using I = arbitrary_iterator<void, true>;
-		static_assert(models::OutputIterator<I, const int&>);
-		static_assert(models::EqualityComparable<I>);
-		static_assert(!models::InputIterator<I>);
+		static_assert(__stl2::OutputIterator<I, const int&>());
+		static_assert(__stl2::EqualityComparable<I>());
+		static_assert(!__stl2::InputIterator<I>());
 		CHECK(iterator_dispatch<I>() == category::output);
 	}
 }
@@ -347,13 +345,13 @@ void test_iter_swap2() {
 		auto a = std::make_unique<int>(42);
 		auto b = std::make_unique<int>(13);
 		using I = decltype(a);
-		static_assert(models::Same<I, decltype(b)>);
-		static_assert(models::Readable<I>);
+		static_assert(__stl2::Same<I, decltype(b)>());
+		static_assert(__stl2::Readable<I>());
 		using R = __stl2::reference_t<I>;
-		static_assert(models::Same<int&, R>);
+		static_assert(__stl2::Same<int&, R>());
 		using RR = __stl2::rvalue_reference_t<I>;
-		static_assert(models::Same<int&&, RR>);
-		static_assert(models::Swappable<R, R>);
+		static_assert(__stl2::Same<int&&, RR>());
+		static_assert(__stl2::Swappable<R, R>());
 
 		// Swappable<R, R>() is true, calls the first overload of
 		// iter_swap (which delegates to swap(*a, *b)):
@@ -368,18 +366,18 @@ void test_iter_swap2() {
 	{
 		auto a = array<int, 4>{0,1,2,3};
 		using I = decltype(a.begin());
-		static_assert(models::Readable<I>);
+		static_assert(__stl2::Readable<I>());
 		using V = __stl2::value_type_t<I>;
-		static_assert(models::Same<int, V>);
+		static_assert(__stl2::Same<int, V>());
 		using R = __stl2::reference_t<I>;
-		static_assert(models::Same<reference_wrapper<int>, R>);
+		static_assert(__stl2::Same<reference_wrapper<int>, R>());
 		using RR = __stl2::rvalue_reference_t<I>;
-		static_assert(models::Same<int&&, RR>);
+		static_assert(__stl2::Same<int&&, RR>());
 
-		static_assert(models::Same<I, decltype(a.begin() + 2)>);
-		static_assert(models::CommonReference<const R&, const R&>);
-		static_assert(!models::Swappable<R, R>);
-		static_assert(models::IndirectlyMovableStorable<I, I>);
+		static_assert(__stl2::Same<I, decltype(a.begin() + 2)>());
+		static_assert(__stl2::CommonReference<const R&, const R&>());
+		static_assert(!__stl2::Swappable<R, R>());
+		static_assert(__stl2::IndirectlyMovableStorable<I, I>());
 
 		// Swappable<R, R>() is not satisfied, and
 		// IndirectlyMovableStorable<I, I>() is satisfied,
@@ -400,52 +398,53 @@ requires
 constexpr bool has_category<T> = true;
 
 void test_std_traits() {
+	using __stl2::Same;
 	using WO = arbitrary_iterator<void, false>;
-	static_assert(models::Same<std::iterator_traits<WO>::iterator_category,
-		std::output_iterator_tag>);
+	static_assert(Same<std::iterator_traits<WO>::iterator_category,
+		std::output_iterator_tag>());
 
 	using O = arbitrary_iterator<void, true>;
-	static_assert(models::Same<std::iterator_traits<O>::iterator_category,
-		std::output_iterator_tag>);
+	static_assert(Same<std::iterator_traits<O>::iterator_category,
+		std::output_iterator_tag>());
 
 	using WI = arbitrary_iterator<__stl2::input_iterator_tag, false>;
 	static_assert(!has_category<std::iterator_traits<WI>>);
 
 	using I = arbitrary_iterator<__stl2::input_iterator_tag, true>;
-	static_assert(models::Same<std::iterator_traits<I>::iterator_category,
-		std::input_iterator_tag>);
+	static_assert(Same<std::iterator_traits<I>::iterator_category,
+		std::input_iterator_tag>());
 
 	using F = arbitrary_iterator<__stl2::forward_iterator_tag, true>;
-	static_assert(models::Same<std::iterator_traits<F>::iterator_category,
-		std::forward_iterator_tag>);
+	static_assert(Same<std::iterator_traits<F>::iterator_category,
+		std::forward_iterator_tag>());
 
 	using B = arbitrary_iterator<__stl2::bidirectional_iterator_tag, true>;
-	static_assert(models::Same<std::iterator_traits<B>::iterator_category,
-		std::bidirectional_iterator_tag>);
+	static_assert(Same<std::iterator_traits<B>::iterator_category,
+		std::bidirectional_iterator_tag>());
 
 	using R = arbitrary_iterator<__stl2::random_access_iterator_tag, true>;
-	static_assert(models::Same<std::iterator_traits<R>::iterator_category,
-		std::random_access_iterator_tag>);
+	static_assert(Same<std::iterator_traits<R>::iterator_category,
+		std::random_access_iterator_tag>());
 
 	using C = arbitrary_iterator<__stl2::ext::contiguous_iterator_tag, true>;
-	static_assert(models::Same<std::iterator_traits<C>::iterator_category,
-		std::random_access_iterator_tag>);
+	static_assert(Same<std::iterator_traits<C>::iterator_category,
+		std::random_access_iterator_tag>());
 
 	using IV = arbitrary_iterator<__stl2::input_iterator_tag, true, int>;
-	static_assert(models::Same<std::iterator_traits<IV>::iterator_category,
-		std::input_iterator_tag>);
+	static_assert(Same<std::iterator_traits<IV>::iterator_category,
+		std::input_iterator_tag>());
 
 	using FV = arbitrary_iterator<__stl2::forward_iterator_tag, true, int>;
-	static_assert(models::Same<std::iterator_traits<FV>::iterator_category,
-		std::input_iterator_tag>);
+	static_assert(Same<std::iterator_traits<FV>::iterator_category,
+		std::input_iterator_tag>());
 
 	using BV = arbitrary_iterator<__stl2::bidirectional_iterator_tag, true, int>;
-	static_assert(models::Same<std::iterator_traits<BV>::iterator_category,
-		std::input_iterator_tag>);
+	static_assert(Same<std::iterator_traits<BV>::iterator_category,
+		std::input_iterator_tag>());
 
 	using RV = arbitrary_iterator<__stl2::random_access_iterator_tag, true, int>;
-	static_assert(models::Same<std::iterator_traits<RV>::iterator_category,
-		std::input_iterator_tag>);
+	static_assert(Same<std::iterator_traits<RV>::iterator_category,
+		std::input_iterator_tag>());
 }
 
 int main() {

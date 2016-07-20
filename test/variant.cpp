@@ -194,24 +194,24 @@ void test_emplaced_index() {
 		}
 		{
 			// V v{emplaced_index<1>, ci}; // ill-formed
-			static_assert(!models::Constructible<V, emplaced_index_t<1>, const int&>);
+			static_assert(!Constructible<V, emplaced_index_t<1>, const int&>());
 		}
 		{
 			// V v{emplaced_index<1>, move(i)}; // ill-formed
-			static_assert(!models::Constructible<V, emplaced_index_t<1>, int&&>);
+			static_assert(!Constructible<V, emplaced_index_t<1>, int&&>());
 		}
 		{
 			// V v{emplaced_index<1>, move(ci)}; // ill-formed
-			static_assert(!models::Constructible<V, emplaced_index_t<1>, const int&&>);
+			static_assert(!Constructible<V, emplaced_index_t<1>, const int&&>());
 		}
 
 		{
 			// V v{emplaced_index<2>, i}; // ill-formed
-			static_assert(!models::Constructible<V, emplaced_index_t<2>, int&>);
+			static_assert(!Constructible<V, emplaced_index_t<2>, int&>());
 		}
 		{
 			// V v{emplaced_index<2>, ci}; // ill-formed
-			static_assert(!models::Constructible<V, emplaced_index_t<2>, const int&>);
+			static_assert(!Constructible<V, emplaced_index_t<2>, const int&>());
 		}
 		{
 			V v{emplaced_index<2>, move(i)};
@@ -219,7 +219,7 @@ void test_emplaced_index() {
 		}
 		{
 			// V v{emplaced_index<2>, move(ci)}; // ill-formed
-			static_assert(!models::Constructible<V, emplaced_index_t<2>, const int&&>);
+			static_assert(!Constructible<V, emplaced_index_t<2>, const int&&>());
 		}
 
 		{
@@ -258,11 +258,11 @@ void test_emplaced_index() {
 
 		{
 			// V v{emplaced_index<5>, i}; // ill-formed
-			static_assert(!models::Constructible<V, emplaced_index_t<5>, int&>);
+			static_assert(!Constructible<V, emplaced_index_t<5>, int&>());
 		}
 		{
 			// V v{emplaced_index<5>, ci}; // ill-formed
-			static_assert(!models::Constructible<V, emplaced_index_t<5>, const int&>);
+			static_assert(!Constructible<V, emplaced_index_t<5>, const int&>());
 		}
 		{
 			V v{emplaced_index<5>, move(i)};
@@ -331,24 +331,24 @@ void test_emplaced_type() {
 		}
 		{
 			// V v{emplaced_type<int&>, ci}; // ill-formed
-			static_assert(!models::Constructible<V, emplaced_type_t<int&>, const int&>);
+			static_assert(!Constructible<V, emplaced_type_t<int&>, const int&>());
 		}
 		{
 			// V v{emplaced_type<int&>, move(i)}; // ill-formed
-			static_assert(!models::Constructible<V, emplaced_type_t<int&>, int&&>);
+			static_assert(!Constructible<V, emplaced_type_t<int&>, int&&>());
 		}
 		{
 			// V v{emplaced_type<int&>, move(ci)}; // ill-formed
-			static_assert(!models::Constructible<V, emplaced_type_t<int&>, const int&&>);
+			static_assert(!Constructible<V, emplaced_type_t<int&>, const int&&>());
 		}
 
 		{
 			// V v{emplaced_type<int&&>, i}; // ill-formed
-			static_assert(!models::Constructible<V, emplaced_type_t<int&&>, int&>);
+			static_assert(!Constructible<V, emplaced_type_t<int&&>, int&>());
 		}
 		{
 			// V v{emplaced_type<int&&>, ci}; // ill-formed
-			static_assert(!models::Constructible<V, emplaced_type_t<int&&>, const int&>);
+			static_assert(!Constructible<V, emplaced_type_t<int&&>, const int&>());
 		}
 		{
 			V v{emplaced_type<int&&>, move(i)};
@@ -356,7 +356,7 @@ void test_emplaced_type() {
 		}
 		{
 			// V v{emplaced_type<int&&>, move(ci)}; // ill-formed
-			static_assert(!models::Constructible<V, emplaced_type_t<int&&>, const int&&>);
+			static_assert(!Constructible<V, emplaced_type_t<int&&>, const int&&>());
 		}
 
 		{
@@ -395,11 +395,11 @@ void test_emplaced_type() {
 
 		{
 			// V v{emplaced_type<const int&&>, i}; // ill-formed
-			static_assert(!models::Constructible<V, emplaced_type_t<const int&&>, int&>);
+			static_assert(!Constructible<V, emplaced_type_t<const int&&>, int&>());
 		}
 		{
 			// V v{emplaced_type<const int&&>, ci}; // ill-formed
-			static_assert(!models::Constructible<V, emplaced_type_t<const int&&>, const int&>);
+			static_assert(!Constructible<V, emplaced_type_t<const int&&>, const int&>());
 		}
 		{
 			V v{emplaced_type<const int&&>, move(i)};
@@ -441,24 +441,24 @@ void test_emplaced_type() {
 	{
 		using V = variant<int, int>;
 		// V v1{emplaced_type<int>}; // ill-formed: ambiguous
-		static_assert(!models::Constructible<V, emplaced_type_t<int>>);
+		static_assert(!Constructible<V, emplaced_type_t<int>>());
 		// V v2{emplaced_type<int>, 42}; // ill-formed: ambiguous
-		static_assert(!models::Constructible<V, emplaced_type_t<int>, int>);
+		static_assert(!Constructible<V, emplaced_type_t<int>, int>());
 	}
 }
 
 void test_construction() {
-	static_assert(models::MoveConstructible<variant<int>>);
-	static_assert(models::MoveConstructible<variant<const int>>);
-	static_assert(models::CopyConstructible<variant<int>>);
-	static_assert(models::CopyConstructible<variant<const int>>);
+	static_assert(MoveConstructible<variant<int>>());
+	static_assert(MoveConstructible<variant<const int>>());
+	static_assert(CopyConstructible<variant<int>>());
+	static_assert(CopyConstructible<variant<const int>>());
 	static_assert(is_trivially_copy_constructible<variant<int>>());
 	static_assert(is_trivially_copy_constructible<variant<const int>>());
 
-	static_assert(models::Movable<variant<int>>);
-	static_assert(!models::Movable<variant<const int>>);
-	static_assert(models::Copyable<variant<int>>);
-	static_assert(!models::Copyable<variant<const int>>);
+	static_assert(Movable<variant<int>>());
+	static_assert(!Movable<variant<const int>>());
+	static_assert(Copyable<variant<int>>());
+	static_assert(!Copyable<variant<const int>>());
 
 	{
 		nontrivial::zero();
@@ -485,7 +485,7 @@ void test_construction() {
 	}
 	{
 		//variant<int, int> v{42}; // ill-formed: ambiguous.
-		static_assert(!models::Constructible<variant<int,int>, int&&>);
+		static_assert(!Constructible<variant<int,int>, int&&>());
 		variant<int, int> v{emplaced_index<1>, 42};
 		CHECK(v.index() == 1u);
 		//get<int>(v); // ill-formed: ambiguous.
@@ -514,17 +514,17 @@ void test_construction() {
 			CHECK(holds_alternative<int&&>(virr));
 		}
 		// variant<int, int&> v1{i}; // ill-formed: ambiguous
-		static_assert(!models::Constructible<variant<int,int&>, int&>);
+		static_assert(!Constructible<variant<int,int&>, int&>());
 		variant<int, int&> v2{move(i)};
 		// variant<int, int&&> v3{move(i)}; // ill-formed: ambiguous
-		static_assert(!models::Constructible<variant<int,int&&>, int&&>);
+		static_assert(!Constructible<variant<int,int&&>, int&&>());
 		variant<int, int&&> v4{i};
 	}
 	{
 		moveonly m{};
 		auto const& cm = m;
 		// variant<moveonly, const moveonly&> v1{move(m)}; // ill-formed: ambiguous
-		static_assert(!models::Constructible<variant<moveonly,const moveonly&>, moveonly&&>);
+		static_assert(!Constructible<variant<moveonly,const moveonly&>, moveonly&&>());
 		variant<moveonly, moveonly&> v2{m};
 		CHECK(holds_alternative<moveonly&>(v2));
 		variant<moveonly, const moveonly&> v3{m};
@@ -806,9 +806,9 @@ void test_void() {
 		V{emplaced_index<0>};
 		V{emplaced_index<2>};
 		// V{emplaced_type<void>}; // ill-formed
-		static_assert(!models::Constructible<V, emplaced_type_t<void>>);
+		static_assert(!Constructible<V, emplaced_type_t<void>>());
 		// V{emplaced_index<1>}; // ill-formed
-		static_assert(!models::Constructible<V, emplaced_index_t<1>>);
+		static_assert(!Constructible<V, emplaced_index_t<1>>());
 
 		static_assert(sizeof(variant<char>) == sizeof(variant<char, void>));
 	}
@@ -1369,23 +1369,23 @@ void test_conversion_assign() {
 	{
 		using V = variant<int, int>;
 		// V v; v = 42; // ill-formed: ambiguous.
-		static_assert(!models::Assignable<V&, int>);
-		static_assert(!models::Assignable<V&, int&>);
-		static_assert(!models::Assignable<V&, int&&>);
-		static_assert(!models::Assignable<V&, const int&>);
-		static_assert(!models::Assignable<V&, const int&&>);
+		static_assert(!Assignable<V&, int>());
+		static_assert(!Assignable<V&, int&>());
+		static_assert(!Assignable<V&, int&&>());
+		static_assert(!Assignable<V&, const int&>());
+		static_assert(!Assignable<V&, const int&&>());
 	}
 	{
 		using V = variant<int&>;
 		// int i = 42; V v{i}; int j = 13; v = j; // ill-formed
-		static_assert(!models::Assignable<V&, int&>);
+		static_assert(!Assignable<V&, int&>());
 	}
 }
 
 void test_swap() {
 	{
 		using V = variant<int, float>;
-		static_assert(models::Swappable<V&>);
+		static_assert(Swappable<V&>());
 		V v1{42};
 		V v2{3.14f};
 		__stl2::swap(v1, v2);
@@ -1395,11 +1395,11 @@ void test_swap() {
 		CHECK(get<int>(v2) == 42);
 	}
 
-	static_assert(!models::Swappable<variant<const int>&>);
+	static_assert(!Swappable<variant<const int>&>());
 
 	{
 		using V = variant<int&>;
-		static_assert(models::Swappable<V&>);
+		static_assert(Swappable<V&>());
 		int i = 42;
 		int j = 13;
 		V v1{i};
@@ -1429,25 +1429,25 @@ void test_swap() {
 
 void test_comparisons() {
 	{
-		static_assert(models::EqualityComparable<variant<int, double>>);
-		static_assert(models::StrictTotallyOrdered<variant<int, double>>);
+		static_assert(EqualityComparable<variant<int, double>>());
+		static_assert(StrictTotallyOrdered<variant<int, double>>());
 
-		static_assert(models::EqualityComparable<variant<int, void, double>>);
-		static_assert(models::StrictTotallyOrdered<variant<int, void, double>>);
+		static_assert(EqualityComparable<variant<int, void, double>>());
+		static_assert(StrictTotallyOrdered<variant<int, void, double>>());
 
 		struct bar {
 			bool operator==(const bar&) const;
 			bool operator!=(const bar&) const;
 		};
-		static_assert(models::EqualityComparable<variant<int, bar>>);
-		static_assert(!models::StrictTotallyOrdered<variant<int, bar>>);
+		static_assert(EqualityComparable<variant<int, bar>>());
+		static_assert(!StrictTotallyOrdered<variant<int, bar>>());
 
 		struct foo {};
-		static_assert(!models::EqualityComparable<variant<int, foo>>);
-		static_assert(!models::StrictTotallyOrdered<variant<int, foo>>);
+		static_assert(!EqualityComparable<variant<int, foo>>());
+		static_assert(!StrictTotallyOrdered<variant<int, foo>>());
 
-		static_assert(models::EqualityComparable<variant<int&, int&&>>);
-		static_assert(models::StrictTotallyOrdered<variant<int&, int&&>>);
+		static_assert(EqualityComparable<variant<int&, int&&>>());
+		static_assert(StrictTotallyOrdered<variant<int&, int&&>>());
 	}
 
 	{
@@ -1478,7 +1478,7 @@ void test_comparisons() {
 	}
 
 	{
-		static_assert(!models::EqualityComparable<variant<int>, variant<long>>);
+		static_assert(!EqualityComparable<variant<int>, variant<long>>());
 	}
 }
 
@@ -1520,17 +1520,17 @@ int main() {
 
 	{
 		// variant<>{}; // ill-formed
-		static_assert(!models::DefaultConstructible<variant<>>);
-		static_assert(!models::DefaultConstructible<variant<int&>>);
-		static_assert(models::MoveConstructible<variant<int, double, nontrivial>>);
-		static_assert(models::MoveConstructible<variant<int, double, moveonly>>);
+		static_assert(!DefaultConstructible<variant<>>());
+		static_assert(!DefaultConstructible<variant<int&>>());
+		static_assert(MoveConstructible<variant<int, double, nontrivial>>());
+		static_assert(MoveConstructible<variant<int, double, moveonly>>());
 		// variant<nonmovable>{variant<nonmovable>{}}; // ill-formed
-		static_assert(!models::MoveConstructible<variant<nonmovable>>);
-		static_assert(models::CopyConstructible<variant<int, double, nontrivial>>);
+		static_assert(!MoveConstructible<variant<nonmovable>>());
+		static_assert(CopyConstructible<variant<int, double, nontrivial>>());
 		// { variant<moveonly> v; auto c = v; } // ill-formed
-		static_assert(!models::CopyConstructible<variant<moveonly>>);
+		static_assert(!CopyConstructible<variant<moveonly>>());
 		// { variant<nonmovable> v; auto c = v; } // ill-formed
-		static_assert(!models::CopyConstructible<variant<nonmovable>>);
+		static_assert(!CopyConstructible<variant<nonmovable>>());
 	}
 
 	{

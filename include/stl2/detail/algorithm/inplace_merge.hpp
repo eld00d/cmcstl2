@@ -48,7 +48,7 @@ STL2_OPEN_NAMESPACE {
 		private:
 			template <BidirectionalIterator I, class C, class P>
 			requires
-				models::Sortable<I, C, P>
+				Sortable<I, C, P>()
 			static void impl(I begin, I middle, I end, difference_type_t<I> len1,
 				difference_type_t<I> len2, temporary_buffer<value_type_t<I>>& buf,
 				C& pred, P& proj)
@@ -82,7 +82,7 @@ STL2_OPEN_NAMESPACE {
 		public:
 			template <BidirectionalIterator I, class C, class P>
 			requires
-				models::Sortable<I, __f<C>, __f<P>>
+				Sortable<I, __f<C>, __f<P>>()
 			void operator()(I begin, I middle, I end, difference_type_t<I> len1, difference_type_t<I> len2,
 				detail::temporary_buffer<value_type_t<I>>& buf, C&& pred_, P&& proj_) const
 			{
@@ -179,7 +179,7 @@ STL2_OPEN_NAMESPACE {
 		{
 			template <BidirectionalIterator I, class C = less<>, class P = identity>
 			requires
-				models::Sortable<I, __f<C>, __f<P>>
+				Sortable<I, __f<C>, __f<P>>()
 			void operator()(I begin, I middle, I end, difference_type_t<I> len1,
 				difference_type_t<I> len2, C&& pred = C{}, P&& proj = P{}) const
 			{
@@ -197,7 +197,7 @@ STL2_OPEN_NAMESPACE {
 	template <BidirectionalIterator I, Sentinel<I> S, class Comp = less<>,
 		class Proj = identity>
 	requires
-		models::Sortable<I, __f<Comp>, __f<Proj>>
+		Sortable<I, __f<Comp>, __f<Proj>>()
 	I inplace_merge(I first, I middle, S last, Comp&& comp = Comp{}, Proj&& proj = Proj{})
 	{
 		auto len1 = __stl2::distance(first, middle);
@@ -214,7 +214,7 @@ STL2_OPEN_NAMESPACE {
 
 	template <BidirectionalRange Rng, class Comp = less<>, class Proj = identity>
 	requires
-		models::Sortable<iterator_t<Rng>, __f<Comp>, __f<Proj>>
+		Sortable<iterator_t<Rng>, __f<Comp>, __f<Proj>>()
 	safe_iterator_t<Rng>
 	inplace_merge(Rng&& rng, iterator_t<Rng> middle, Comp&& comp = Comp{}, Proj&& proj = Proj{})
 	{

@@ -32,23 +32,9 @@
 STL2_OPEN_NAMESPACE {
 	namespace detail {
 		template <class T>
-		constexpr bool __dereferenceable = false;
-		template <class T>
-		requires
-			requires(T& t) {
-				STL2_DEDUCE_AUTO_REF_REF(*t);
-			}
-		constexpr bool __dereferenceable<T> = true;
-
-		template <class T>
-		concept bool Dereferenceable = __dereferenceable<T&>;
-	}
-
-	namespace models {
-		template <class>
-		constexpr bool Dereferenceable = false;
-		detail::Dereferenceable{R}
-		constexpr bool Dereferenceable<R> = true;
+		concept bool Dereferenceable = requires(T& t) {
+			STL2_DEDUCE_AUTO_REF_REF(*t);
+		};
 	}
 
 	///////////////////////////////////////////////////////////////////////////
@@ -77,8 +63,7 @@ STL2_OPEN_NAMESPACE {
 		struct fn {
 			template <class R>
 			requires
-				models::Dereferenceable<R> &&
-				has_customization<R>
+				detail::Dereferenceable<R> && has_customization<R>
 			constexpr decltype(auto) operator()(R&& r) const
 			STL2_NOEXCEPT_RETURN(
 				iter_move(r)
@@ -86,8 +71,7 @@ STL2_OPEN_NAMESPACE {
 
 			template <class R>
 			requires
-				models::Dereferenceable<R> &&
-				!has_customization<R> &&
+				detail::Dereferenceable<R> && !has_customization<R> &&
 				is_reference<reference_t<R>>::value
 			constexpr decltype(auto) operator()(R&& r) const noexcept {
 				return static_cast<remove_reference_t<reference_t<R>>&&>(*r);
@@ -95,10 +79,9 @@ STL2_OPEN_NAMESPACE {
 
 			template <class R>
 			requires
-				models::Dereferenceable<R> &&
-				!has_customization<R> &&
+				detail::Dereferenceable<R> && !has_customization<R> &&
 				!is_reference<reference_t<R>>::value &&
-				models::Constructible<decay_t<reference_t<R>>, reference_t<R>>
+				Constructible<decay_t<reference_t<R>>, reference_t<R>>()
 			constexpr auto operator()(R&& r) const
 			noexcept(is_nothrow_constructible<
 				decay_t<reference_t<R>>, reference_t<R>>::value)
@@ -192,44 +175,29 @@ STL2_OPEN_NAMESPACE {
 	// Not to spec: Additional requirements from P0022.
 	//
 	template <class I>
-	constexpr bool __readable = false;
-	template <class I>
-		requires requires (const I& i) {
-			// Associated types
-			typename value_type_t<I>;
-			typename reference_t<I>;
-			typename rvalue_reference_t<I>;
-
-			// Valid expressions
-			STL2_EXACT_TYPE_CONSTRAINT(*i, reference_t<I>);
-			STL2_EXACT_TYPE_CONSTRAINT(__stl2::iter_move(i), rvalue_reference_t<I>);
-		} &&
-		// Relationships between associated types
-		models::CommonReference<reference_t<I>, value_type_t<I>&> &&
-		models::CommonReference<reference_t<I>, rvalue_reference_t<I>> &&
-		models::CommonReference<rvalue_reference_t<I>, const value_type_t<I>&> &&
-		// Extra sanity checks (not strictly needed)
-		models::Same<
-			common_reference_t<reference_t<I>, value_type_t<I>>,
-			value_type_t<I>> &&
-		models::Same<
-			common_reference_t<rvalue_reference_t<I>, value_type_t<I>>,
-			value_type_t<I>>
-	constexpr bool __readable<I> = true;
-
-	template <class I>
 	concept bool Readable() {
-		return detail::Dereferenceable<I> &&
-			Movable<I>() &&
-			DefaultConstructible<I>() &&
-			__readable<I>;
-	}
+		return detail::Dereferenceable<I> && Movable<I>() && DefaultConstructible<I>() &&
+			requires (const I& i) {
+				// Associated types
+				typename value_type_t<I>;
+				typename reference_t<I>;
+				typename rvalue_reference_t<I>;
 
-	namespace models {
-		template <class>
-		constexpr bool Readable = false;
-		__stl2::Readable{I}
-		constexpr bool Readable<I> = true;
+				// Valid expressions
+				STL2_EXACT_TYPE_CONSTRAINT(*i, reference_t<I>);
+				STL2_EXACT_TYPE_CONSTRAINT(__stl2::iter_move(i), rvalue_reference_t<I>);
+			} &&
+			// Relationships between associated types
+			CommonReference<reference_t<I>, value_type_t<I>&>() &&
+			CommonReference<reference_t<I>, rvalue_reference_t<I>>() &&
+			CommonReference<rvalue_reference_t<I>, const value_type_t<I>&>() &&
+			// Extra sanity checks (not strictly needed)
+			Same<
+				common_reference_t<reference_t<I>, value_type_t<I>>,
+				value_type_t<I>>() &&
+			Same<
+				common_reference_t<rvalue_reference_t<I>, value_type_t<I>>,
+				value_type_t<I>>();
 	}
 
 	// A generally useful dependent type
@@ -241,31 +209,17 @@ STL2_OPEN_NAMESPACE {
 	// Writable [iterators.writable]
 	// Not to spec, but getting closer.
 	//
-	template <class, class>
-	constexpr bool __writable = false;
-	template <class Out, class R>
-	requires
-		requires(Out& o, R&& r) {
-			(void)(*o = (R&&)r);
-			// Handwaving: After the assignment, the value of the element denoted
-			//             by o "corresponds" to the value originally denoted by r.
-			// Axiom: If r equals foo && Readable<Out>() &&
-			//        Same<value_type_t<Out>, ????>() then
-			//        (*o = (R&&)r, *o equals foo)
-		}
-	constexpr bool __writable<Out, R> = true;
-
 	template <class Out, class R>
 	concept bool Writable() {
 		return detail::Dereferenceable<Out> && Movable<Out>() &&
-			DefaultConstructible<Out>() && __writable<Out, R>;
-	}
-
-	namespace models {
-		template <class, class>
-		constexpr bool Writable = false;
-		__stl2::Writable{Out, R}
-		constexpr bool Writable<Out, R> = true;
+			DefaultConstructible<Out>() && requires(Out& o, R&& r) {
+				(void)(*o = (R&&)r);
+				// Handwaving: After the assignment, the value of the element denoted
+				//             by o "corresponds" to the value originally denoted by r.
+				// Axiom: If r equals foo && Readable<Out>() &&
+				//        Same<value_type_t<Out>, ????>() then
+				//        (*o = (R&&)r, *o equals foo)
+			};
 	}
 
 	///////////////////////////////////////////////////////////////////////////
@@ -274,13 +228,6 @@ STL2_OPEN_NAMESPACE {
 	template <class In, class Out>
 	concept bool IndirectlyMovable() {
 		return Readable<In>() && Writable<Out, rvalue_reference_t<In>>();
-	}
-
-	namespace models {
-		template <class, class>
-		constexpr bool IndirectlyMovable = false;
-		__stl2::IndirectlyMovable{In, Out}
-		constexpr bool IndirectlyMovable<In, Out> = true;
 	}
 
 	template <class In, class Out>
@@ -302,13 +249,6 @@ STL2_OPEN_NAMESPACE {
 			Assignable<value_type_t<In>&, rvalue_reference_t<In>>();
 	}
 
-	namespace models {
-		template <class, class>
-		constexpr bool IndirectlyMovableStorable = false;
-		__stl2::IndirectlyMovableStorable{In, Out}
-		constexpr bool IndirectlyMovableStorable<In, Out> = true;
-	}
-
 	template <class In, class Out>
 	constexpr bool is_nothrow_indirectly_movable_storable_v = false;
 
@@ -327,13 +267,6 @@ STL2_OPEN_NAMESPACE {
 		return IndirectlyMovable<In, Out>() && Writable<Out, reference_t<In>>();
 	}
 
-	namespace models {
-		template <class, class>
-		constexpr bool IndirectlyCopyable = false;
-		__stl2::IndirectlyCopyable{In, Out}
-		constexpr bool IndirectlyCopyable<In, Out> = true;
-	}
-
 	///////////////////////////////////////////////////////////////////////////
 	// IndirectlyCopyableStorable [commonalgoreq.indirectlycopyable]
 	//
@@ -345,13 +278,6 @@ STL2_OPEN_NAMESPACE {
 			Copyable<value_type_t<In>>() &&
 			Constructible<value_type_t<In>, reference_t<In>>() &&
 			Assignable<value_type_t<In>&, reference_t<In>>();
-	}
-
-	namespace models {
-		template <class, class>
-		constexpr bool IndirectlyCopyableStorable = false;
-		__stl2::IndirectlyCopyableStorable{In, Out}
-		constexpr bool IndirectlyCopyableStorable<In, Out> = true;
 	}
 
 	///////////////////////////////////////////////////////////////////////////
@@ -384,7 +310,7 @@ STL2_OPEN_NAMESPACE {
 		template <class UR1, class UR2, class R1, class R2>
 		requires
 			!has_customization<R1, R2> &&
-			models::Swappable<reference_t<UR1>, reference_t<UR2>>
+			Swappable<reference_t<UR1>, reference_t<UR2>>()
 		constexpr void impl(R1&& r1, R2&& r2)
 		STL2_NOEXCEPT_RETURN(
 			(void)__stl2::swap(*r1, *r2)
@@ -393,12 +319,12 @@ STL2_OPEN_NAMESPACE {
 		template <class UR1, class UR2, class R1, class R2>
 		requires
 			!has_customization<R1, R2> &&
-			!models::Swappable<reference_t<UR1>, reference_t<UR2>> &&
-			models::IndirectlyMovableStorable<UR1, UR2> &&
-			models::IndirectlyMovableStorable<UR2, UR1>
+			!Swappable<reference_t<UR1>, reference_t<UR2>>() &&
+			IndirectlyMovableStorable<UR1, UR2>() &&
+			IndirectlyMovableStorable<UR2, UR1>()
 		constexpr void impl(R1&& r1, R2&& r2)
-			noexcept(is_nothrow_indirectly_movable_storable_v<UR1, UR2> &&
-				is_nothrow_indirectly_movable_storable_v<UR2, UR1>)
+		noexcept(is_nothrow_indirectly_movable_storable_v<UR1, UR2> &&
+			is_nothrow_indirectly_movable_storable_v<UR2, UR1>)
 		{
 			value_type_t<UR1> tmp = __stl2::iter_move(r1);
 			*r1 = __stl2::iter_move(r2);
@@ -420,13 +346,11 @@ STL2_OPEN_NAMESPACE {
 				class UR1 = remove_reference_t<R1>,
 				class UR2 = remove_reference_t<R2>>
 			requires
-				models::Readable<UR1> &&
-				models::Readable<UR2> &&
-				has_impl<R1, R2>
+				Readable<UR1>() && Readable<UR2>() && has_impl<R1, R2>
 			constexpr void operator()(R1&& r1, R2&& r2) const
 			STL2_NOEXCEPT_RETURN(
-				(void)__iter_swap::impl<UR1, UR2>(__stl2::forward<R1>(r1),
-					__stl2::forward<R2>(r2))
+				(void)__iter_swap::impl<UR1, UR2>(
+					__stl2::forward<R1>(r1), __stl2::forward<R2>(r2))
 			)
 		};
 	}
@@ -439,23 +363,14 @@ STL2_OPEN_NAMESPACE {
 	// IndirectlySwappable [commonalgoreq.indirectlyswappable]
 	// Not to spec: Alternate formulation from the proxy iterator work (P0022).
 	//
-	namespace models {
-		template <class I1, class I2 = I1>
-		constexpr bool IndirectlySwappable = false;
-		template <class I1, class I2>
-		requires
-			requires (I1 i1, I2 i2) {
-				__stl2::iter_swap(i1, i2);
-				__stl2::iter_swap(i2, i1);
-				__stl2::iter_swap(i1, i1);
-				__stl2::iter_swap(i2, i2);
-			}
-		constexpr bool IndirectlySwappable<I1, I2> = true;
-	}
-
 	template <class I1, class I2 = I1>
 	concept bool IndirectlySwappable() {
-		return models::IndirectlySwappable<I1, I2>;
+		return requires (I1 i1, I2 i2) {
+			__stl2::iter_swap(i1, i2);
+			__stl2::iter_swap(i2, i1);
+			__stl2::iter_swap(i1, i1);
+			__stl2::iter_swap(i2, i2);
+		};
 	}
 
 	template <class R1, class R2>
@@ -482,16 +397,12 @@ STL2_OPEN_NAMESPACE {
 	//
 	struct output_iterator_tag {};
 	struct input_iterator_tag {};
-	struct forward_iterator_tag :
-		input_iterator_tag {};
-	struct bidirectional_iterator_tag :
-		forward_iterator_tag {};
-	struct random_access_iterator_tag :
-		bidirectional_iterator_tag {};
+	struct forward_iterator_tag : input_iterator_tag {};
+	struct bidirectional_iterator_tag : forward_iterator_tag {};
+	struct random_access_iterator_tag : bidirectional_iterator_tag {};
 
 	namespace ext {
-		struct contiguous_iterator_tag :
-			random_access_iterator_tag {};
+		struct contiguous_iterator_tag : random_access_iterator_tag {};
 	}
 
 	///////////////////////////////////////////////////////////////////////////
@@ -551,20 +462,12 @@ STL2_OPEN_NAMESPACE {
 	//
 	template <class I>
 	concept bool Iterator() {
-		return WeaklyIncrementable<I>() &&
-			detail::Dereferenceable<I&>;
+		return WeaklyIncrementable<I>() && detail::Dereferenceable<I&>;
 		// Axiom?: i is non-singular iff it denotes an element
 		// Axiom?: if i equals j then i and j denote equal elements
 		// Axiom?: I{} is in the domain of copy/move construction/assignment
 		//        (This should probably be a requirement of the object concepts,
 		//         or at least Semiregular.)
-	}
-
-	namespace models {
-		template <class>
-		constexpr bool Iterator = false;
-		__stl2::Iterator{I}
-		constexpr bool Iterator<I> = true;
 	}
 
 	///////////////////////////////////////////////////////////////////////////
@@ -575,8 +478,7 @@ STL2_OPEN_NAMESPACE {
 	//
 	template <class S, class I>
 	concept bool Sentinel() {
-		return Iterator<I>() && Semiregular<S>() &&
-			WeaklyEqualityComparable<S, I>();
+		return Iterator<I>() && Semiregular<S>() && WeaklyEqualityComparable<S, I>();
 			// Axiom: if [i,s) denotes a range then:
 			//        * i == s is well-defined
 			//        * if bool(i == s) then [i,s) is empty
@@ -584,13 +486,6 @@ STL2_OPEN_NAMESPACE {
 			//          * i is dereferenceable
 			//          * the element denoted by i is the first element of [i,s)
 			//          * [++i,s) denotes a range
-	}
-
-	namespace models {
-		template <class, class>
-		constexpr bool Sentinel = false;
-		__stl2::Sentinel{S, I}
-		constexpr bool Sentinel<S, I> = true;
 	}
 
 	///////////////////////////////////////////////////////////////////////////
@@ -603,34 +498,21 @@ STL2_OPEN_NAMESPACE {
 	template <class S, class I>
 	constexpr bool disable_sized_sentinel = false;
 
-	template <class, class>
-	constexpr bool __sized_sentinel = false;
-	template <class S, class I>
-		requires requires (const I i, const S s) {
-			STL2_EXACT_TYPE_CONSTRAINT(s - i, difference_type_t<I>);
-			STL2_EXACT_TYPE_CONSTRAINT(i - s, difference_type_t<I>);
-			// Axiom: If [i,s) denotes a range and N is the smallest
-			//        non-negative integer such that N applications of
-			//        ++i make bool(i == s) == true
-			//        * if N is representable by difference_type_t<I> then
-			//          s - i is well-defined and equal to N
-			//        * if -N is representable by difference_type_t<I> then
-			//          i - s is well-defined and equal to -N
-		}
-	constexpr bool __sized_sentinel<S, I> = true;
-
 	template <class S, class I>
 	concept bool SizedSentinel() {
 		return Sentinel<S, I>() &&
 			!disable_sized_sentinel<remove_cv_t<S>, remove_cv_t<I>> &&
-			__sized_sentinel<S, I>;
-	}
-
-	namespace models {
-		template <class S, class I>
-		constexpr bool SizedSentinel = false;
-		__stl2::SizedSentinel{S, I}
-		constexpr bool SizedSentinel<S, I> = true;
+			requires (const I i, const S s) {
+				STL2_EXACT_TYPE_CONSTRAINT(s - i, difference_type_t<I>);
+				STL2_EXACT_TYPE_CONSTRAINT(i - s, difference_type_t<I>);
+				// Axiom: If [i,s) denotes a range and N is the smallest
+				//        non-negative integer such that N applications of
+				//        ++i make bool(i == s) == true
+				//        * if N is representable by difference_type_t<I> then
+				//          s - i is well-defined and equal to N
+				//        * if -N is representable by difference_type_t<I> then
+				//          i - s is well-defined and equal to -N
+			};
 	}
 
 	///////////////////////////////////////////////////////////////////////////
@@ -642,38 +524,18 @@ STL2_OPEN_NAMESPACE {
 		return Iterator<I>() && Writable<I, T>();
 	}
 
-	namespace models {
-		template <class, class>
-		constexpr bool OutputIterator = false;
-		__stl2::OutputIterator{I, T}
-		constexpr bool OutputIterator<I, T> = true;
-	}
-
 	///////////////////////////////////////////////////////////////////////////
 	// InputIterator [iterators.input]
 	//
 	template <class I>
-	constexpr bool __input_iterator = false;
-	template <class I>
-		requires requires (I& i, const I& ci) {
+	concept bool InputIterator() {
+		return Iterator<I>() && Readable<I>() && requires (I& i, const I& ci) {
 			typename iterator_category_t<I>;
 			DerivedFrom<iterator_category_t<I>, input_iterator_tag>();
 			STL2_DEDUCTION_CONSTRAINT(i++, Readable);
 			requires Same<value_type_t<I>, value_type_t<decltype(i++)>>();
 			{ *ci } -> const value_type_t<I>&;
-		}
-	constexpr bool __input_iterator<I> = true;
-
-	template <class I>
-	concept bool InputIterator() {
-		return Iterator<I>() && Readable<I>() && __input_iterator<I>;
-	}
-
-	namespace models {
-		template <class>
-		constexpr bool InputIterator = false;
-		__stl2::InputIterator{I}
-		constexpr bool InputIterator<I> = true;
+		};
 	}
 
 	///////////////////////////////////////////////////////////////////////////
@@ -694,13 +556,6 @@ STL2_OPEN_NAMESPACE {
 			//        all iterator values that participate in a range.
 	}
 
-	namespace models {
-		template <class>
-		constexpr bool ForwardIterator = false;
-		__stl2::ForwardIterator{I}
-		constexpr bool ForwardIterator<I> = true;
-	}
-
 	///////////////////////////////////////////////////////////////////////////
 	// BidirectionalIterator [iterators.bidirectional]
 	//
@@ -711,24 +566,9 @@ STL2_OPEN_NAMESPACE {
 			ext::Decrementable<I>();
 	}
 
-	namespace models {
-		template <class>
-		constexpr bool BidirectionalIterator = false;
-		__stl2::BidirectionalIterator{I}
-		constexpr bool BidirectionalIterator<I> = true;
-	}
-
 	///////////////////////////////////////////////////////////////////////////
 	// RandomAccessIterator [iterators.random.access]
 	//
-	template <class I>
-	constexpr bool __random_access_iterator = false;
-	template <class I>
-		requires requires (const I& ci, const difference_type_t<I> n) {
-			STL2_EXACT_TYPE_CONSTRAINT(ci[n], reference_t<I>);
-		}
-	constexpr bool __random_access_iterator<I> = true;
-
 	template <class I>
 	concept bool RandomAccessIterator() {
 		return BidirectionalIterator<I>() &&
@@ -737,19 +577,14 @@ STL2_OPEN_NAMESPACE {
 			// Should ordering be in SizedSentinel and/or RandomAccessIncrementable?
 			StrictTotallyOrdered<I>() &&
 			ext::RandomAccessIncrementable<I>() &&
-			__random_access_iterator<I>;
+			requires (const I& ci, const difference_type_t<I> n) {
+				STL2_EXACT_TYPE_CONSTRAINT(ci[n], reference_t<I>);
+			};
 		// FIXME: Axioms for definition space of ordering operations. Don't
 		// require them to be the same space as ==, since pointers can't meet
 		// that requirement. Formulation should be similar to that for == in
 		// ForwardIterator, e.g., "if [i,j) denotes a range, i < j et al are
 		// well-defined."
-	}
-
-	namespace models {
-		template <class>
-		constexpr bool RandomAccessIterator = false;
-		__stl2::RandomAccessIterator{I}
-		constexpr bool RandomAccessIterator<I> = true;
 	}
 
 	///////////////////////////////////////////////////////////////////////////
@@ -763,13 +598,6 @@ STL2_OPEN_NAMESPACE {
 				_Is<reference_t<I>, is_reference> &&
 				Same<value_type_t<I>, decay_t<reference_t<I>>>();
 		}
-	}
-
-	namespace models {
-		template <class>
-		constexpr bool ContiguousIterator = false;
-		__stl2::ext::ContiguousIterator{I}
-		constexpr bool ContiguousIterator<I> = true;
 	}
 
 	///////////////////////////////////////////////////////////////////////////
@@ -853,7 +681,7 @@ STL2_OPEN_NAMESPACE {
 			return requires {
 				typename I::iterator_category;
 				requires DerivedFrom<typename I::iterator_category, std::input_iterator_tag>() ||
-								 DerivedFrom<typename I::iterator_category, std::output_iterator_tag>();
+					DerivedFrom<typename I::iterator_category, std::output_iterator_tag>();
 			};
 		}
 	}

@@ -35,7 +35,7 @@ STL2_OPEN_NAMESPACE {
 	template <BidirectionalIterator I, Sentinel<I> S, class Comp = less<>,
 		class Proj = identity>
 	requires
-		models::Sortable<I, __f<Comp>, __f<Proj>>
+		Sortable<I, __f<Comp>, __f<Proj>>()
 	bool prev_permutation(I first, S last, Comp&& comp_ = Comp{},
 		Proj&& proj_ = Proj{})
 	{
@@ -68,7 +68,7 @@ STL2_OPEN_NAMESPACE {
 
 	template <BidirectionalRange Rng, class Comp = less<>, class Proj = identity>
 	requires
-		models::Sortable<iterator_t<Rng>, __f<Comp>, __f<Proj>>
+		Sortable<iterator_t<Rng>, __f<Comp>, __f<Proj>>()
 	bool prev_permutation(Rng&& rng, Comp&& comp = Comp{}, Proj&& proj = Proj{})
 	{
 		return __stl2::prev_permutation(__stl2::begin(rng), __stl2::end(rng),

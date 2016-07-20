@@ -24,9 +24,9 @@ STL2_OPEN_NAMESPACE {
 	template <InputIterator I, Sentinel<I> S, class T1, class T2,
 		class Proj = identity>
 	requires
-		models::Writable<I, const T2&> &&
-		models::IndirectCallableRelation<
-			equal_to<>, projected<I, __f<Proj>>, const T1*>
+		Writable<I, const T2&>() &&
+		IndirectCallableRelation<
+			equal_to<>, projected<I, __f<Proj>>, const T1*>()
 	I replace(I first, S last, const T1& old_value, const T2& new_value,
 		Proj&& proj_ = Proj{})
 	{
@@ -44,9 +44,9 @@ STL2_OPEN_NAMESPACE {
 	// Extension: Relax to InputRange
 	template <InputRange Rng, class T1, class T2, class Proj = identity>
 	requires
-		models::Writable<iterator_t<Rng>, const T2&> &&
-		models::IndirectCallableRelation<
-			equal_to<>, projected<iterator_t<Rng>, __f<Proj>>, const T1*>
+		Writable<iterator_t<Rng>, const T2&>() &&
+		IndirectCallableRelation<
+			equal_to<>, projected<iterator_t<Rng>, __f<Proj>>, const T1*>()
 	safe_iterator_t<Rng>
 	replace(Rng&& rng, const T1& old_value,	const T2& new_value,
 		Proj&& proj = Proj{})

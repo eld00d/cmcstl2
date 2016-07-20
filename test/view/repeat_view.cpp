@@ -33,15 +33,15 @@ int main() {
 		// so the iterators hold copies:
 		static_assert(sizeof(first) == sizeof(int));
 		// and operator* returns copies:
-		static_assert(stl2::models::Same<decltype(*first), int>);
+		static_assert(stl2::Same<decltype(*first), int>());
 		auto second = first + 1;
 		CHECK(*second == *first);
 
 		// operator-> returns a proxy
 		static_assert(
-			stl2::models::Same<
+			stl2::Same<
 				decltype(first.operator->()),
-				stl2::detail::operator_arrow_proxy<decltype(first)>>);
+				stl2::detail::operator_arrow_proxy<decltype(first)>>());
 	}
 	{
 		using big_type = std::array<double, 128>;
@@ -63,9 +63,9 @@ int main() {
 
 		// operator-> returns a pointer
 		static_assert(
-			stl2::models::Same<
+			stl2::Same<
 				decltype(first.operator->()),
-				const big_type*>);
+				const big_type*>());
 	}
 	{
 		constexpr unsigned N = 1u << 16;
@@ -91,9 +91,9 @@ int main() {
 
 		// operator-> again returns a pointer
 		static_assert(
-			stl2::models::Same<
+			stl2::Same<
 				decltype(first.operator->()),
-				const std::vector<int>*>);
+				const std::vector<int>*>());
 		CHECK(first->size() == N);
 	}
 

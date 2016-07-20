@@ -40,26 +40,12 @@ STL2_OPEN_NAMESPACE {
 			ext::Invokable<F&, Args...>();
 	}
 
-	namespace models {
-		template <class, class...>
-		constexpr bool Callable = false;
-		__stl2::Callable{F, ...Args}
-		constexpr bool Callable<F, Args...> = true;
-	}
-
 	///////////////////////////////////////////////////////////////////////////
 	// RegularCallable [concepts.lib.callables.regularcallable]
 	//
 	template <class F, class...Args>
 	concept bool RegularCallable() {
 		return Callable<F, Args...>();
-	}
-
-	namespace models {
-		template <class, class...>
-		constexpr bool RegularCallable = false;
-		__stl2::RegularCallable{F, ...Args}
-		constexpr bool RegularCallable<F, Args...> = true;
 	}
 
 	///////////////////////////////////////////////////////////////////////////
@@ -69,13 +55,6 @@ STL2_OPEN_NAMESPACE {
 	concept bool Predicate() {
 		return RegularCallable<F, Args...>() &&
 			Boolean<result_of_t<F&(Args...)>>();
-	}
-
-	namespace models {
-		template <class, class...>
-		constexpr bool Predicate = false;
-		__stl2::Predicate{F, ...Args}
-		constexpr bool Predicate<F, Args...> = true;
 	}
 
 	///////////////////////////////////////////////////////////////////////////
@@ -96,15 +75,6 @@ STL2_OPEN_NAMESPACE {
 			Relation<R, common_reference_t<const T&, const U&>>();
 	}
 
-	namespace models {
-		template <class R, class T, class U = T>
-		constexpr bool Relation = false;
-		__stl2::Relation{R, T}
-		constexpr bool Relation<R, T, T> = true;
-		__stl2::Relation{R, T, U}
-		constexpr bool Relation<R, T, U> = true;
-	}
-
 	///////////////////////////////////////////////////////////////////////////
 	// StrictWeakOrder [concepts.lib.callables.strictweakorder]
 	//
@@ -116,15 +86,6 @@ STL2_OPEN_NAMESPACE {
 	template <class R, class T, class U>
 	concept bool StrictWeakOrder() {
 		return Relation<R, T, U>();
-	}
-
-	namespace models {
-		template <class R, class T, class U = T>
-		constexpr bool StrictWeakOrder = false;
-		__stl2::StrictWeakOrder{R, T}
-		constexpr bool StrictWeakOrder<R, T, T> = true;
-		__stl2::StrictWeakOrder{R, T, U}
-		constexpr bool StrictWeakOrder<R, T, U> = true;
 	}
 } STL2_CLOSE_NAMESPACE
 

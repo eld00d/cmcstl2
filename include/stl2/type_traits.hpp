@@ -159,25 +159,16 @@ STL2_OPEN_NAMESPACE {
 	struct common_reference<T, U, V, W...>
 	: common_reference<common_reference_t<T, U>, V, W...> {};
 
-	namespace models {
-		template <class, class>
-		constexpr bool CommonReference = false;
-		template <class T, class U>
-		requires
-			requires (T (&t)(), U (&u)()) {
-				typename common_reference_t<T, U>;
-				typename common_reference_t<U, T>;
-				requires Same<common_reference_t<T, U>,
-					common_reference_t<U, T>>;
-				common_reference_t<T, U>(t());
-				common_reference_t<T, U>(u());
-			}
-		constexpr bool CommonReference<T, U> = true;
-	}
-
 	template <class T, class U>
 	concept bool CommonReference() {
-		return models::CommonReference<T, U>;
+		return requires (T (&t)(), U (&u)()) {
+			typename common_reference_t<T, U>;
+			typename common_reference_t<U, T>;
+			requires Same<common_reference_t<T, U>,
+				common_reference_t<U, T>>();
+			common_reference_t<T, U>(t());
+			common_reference_t<T, U>(u());
+		};
 	}
 
 	///////////////////////////////////////////////////////////////////////////
@@ -194,29 +185,20 @@ STL2_OPEN_NAMESPACE {
 	// This concept augments the axiom with added syntax requirements to
 	// provide "SomewhatVerifiablyCommon."
 	//
-	namespace models {
-		template <class, class>
-		constexpr bool Common = false;
-		template <class T, class U>
-		requires
-			CommonReference<add_lvalue_reference_t<const T>,
-				add_lvalue_reference_t<const U>> &&
+	template <class T, class U>
+	concept bool Common() {
+		return CommonReference<add_lvalue_reference_t<const T>,
+			add_lvalue_reference_t<const U>>() &&
 			requires (T (&t)(), U (&u)()) {
 				typename common_type_t<T, U>;
 				typename common_type_t<U, T>;
-				requires Same<common_type_t<T, U>, common_type_t<U, T>>;
+				requires Same<common_type_t<T, U>, common_type_t<U, T>>();
 				common_type_t<T, U>(t());
 				common_type_t<T, U>(u());
 				requires CommonReference<add_lvalue_reference_t<common_type_t<T, U>>,
 					common_reference_t<add_lvalue_reference_t<const T>,
-						add_lvalue_reference_t<const U>>>;
-			}
-		constexpr bool Common<T, U> = true;
-	}
-
-	template <class T, class U>
-	concept bool Common() {
-		return models::Common<T, U>;
+						add_lvalue_reference_t<const U>>>();
+			};
 	}
 } STL2_CLOSE_NAMESPACE
 

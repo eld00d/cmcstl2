@@ -31,10 +31,6 @@ STL2_OPEN_NAMESPACE {
 		// Supported extensions beyond what is specified in C++ and
 		// the Ranges proposal, acceptable for user code to access.
 	}
-	namespace models {
-		// Concept-test predicates. E.g., models::ForwardIterator<I> is true iff
-		// I meets the syntactic requirements of ForwardIterator.
-	}
 } STL2_CLOSE_NAMESPACE
 
 // Used to qualify STL2 names
@@ -47,7 +43,7 @@ STL2_OPEN_NAMESPACE {
 	// Must implement move here instead of using std::move to avoid
 	// pulling in the move algorithm.
 	template <class T>
-		requires true
+	requires true
 	constexpr std::remove_reference_t<T>&& move(T&& t) noexcept {
 		return static_cast<std::remove_reference_t<T>&&>(t);
 	}

@@ -23,9 +23,9 @@ STL2_OPEN_NAMESPACE {
 	template <InputIterator I, Sentinel<I> S, class T1, class T2,
 		OutputIterator<const T2&> O, class Proj = identity>
 	requires
-		models::IndirectlyCopyable<I, O> &&
-		models::IndirectCallableRelation<
-			equal_to<>, projected<I, __f<Proj>>, const T1*>
+		IndirectlyCopyable<I, O>() &&
+		IndirectCallableRelation<
+			equal_to<>, projected<I, __f<Proj>>, const T1*>()
 	tagged_pair<tag::in(I), tag::out(O)>
 	replace_copy(I first, S last, O result, const T1& old_value,
 		const T2& new_value, Proj&& proj_ = Proj{})
@@ -45,10 +45,10 @@ STL2_OPEN_NAMESPACE {
 
 	template <InputRange Rng, class T1, class T2, class O, class Proj = identity>
 	requires
-		models::OutputIterator<__f<O>, const T2&> &&
-		models::IndirectlyCopyable<iterator_t<Rng>, __f<O>> &&
-		models::IndirectCallableRelation<
-			equal_to<>, projected<iterator_t<Rng>, __f<Proj>>, const T1*>
+		OutputIterator<__f<O>, const T2&>() &&
+		IndirectlyCopyable<iterator_t<Rng>, __f<O>>() &&
+		IndirectCallableRelation<
+			equal_to<>, projected<iterator_t<Rng>, __f<Proj>>, const T1*>()
 	tagged_pair<tag::in(safe_iterator_t<Rng>), tag::out(__f<O>)>
 	replace_copy(Rng&& rng, O&& result, const T1& old_value,
 		const T2& new_value, Proj&& proj = Proj{})
@@ -61,10 +61,10 @@ STL2_OPEN_NAMESPACE {
 	// Extension
 	template <class E, class T1, class T2, class O, class Proj = identity>
 	requires
-		models::OutputIterator<__f<O>, const T2&> &&
-		models::IndirectlyCopyable<const E*, __f<O>> &&
-		models::IndirectCallableRelation<
-			equal_to<>, projected<const E*, __f<Proj>>, const T1*>
+		OutputIterator<__f<O>, const T2&>() &&
+		IndirectlyCopyable<const E*, __f<O>>() &&
+		IndirectCallableRelation<
+			equal_to<>, projected<const E*, __f<Proj>>, const T1*>()
 	tagged_pair<tag::in(dangling<const E*>), tag::out(__f<O>)>
 	replace_copy(std::initializer_list<E>&& rng,
 		O&& result, const T1& old_value,

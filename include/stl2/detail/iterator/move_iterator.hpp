@@ -44,8 +44,8 @@ STL2_OPEN_NAMESPACE {
 		public:
 			using difference_type = difference_type_t<I>;
 			using value_type = value_type_t<I>;
-			using single_pass = meta::bool_<!models::ForwardIterator<I>>;
-			using contiguous = meta::bool_<models::ContiguousIterator<I>>;
+			using single_pass = meta::bool_<!ForwardIterator<I>()>;
+			using contiguous = meta::bool_<ext::ContiguousIterator<I>()>;
 
 			class mixin : protected detail::ebo_box<cursor> {
 				using box_t = detail::ebo_box<cursor>;
@@ -220,7 +220,7 @@ STL2_OPEN_NAMESPACE {
 
 	template <class S>
 	requires
-		models::Semiregular<__f<S>>
+		Semiregular<__f<S>>()
 	STL2_CONSTEXPR_EXT auto make_move_sentinel(S&& s)
 	STL2_NOEXCEPT_RETURN(
 		move_sentinel<__f<S>>(__stl2::forward<S>(s))

@@ -50,7 +50,7 @@ STL2_OPEN_NAMESPACE {
 
 			template <class I, class Comp, class Proj>
 			requires
-				models::Sortable<I, Comp, Proj>
+				Sortable<I, Comp, Proj>()
 			inline I merge_n_with_buffer(I f0, difference_type_t<I> n0,
 				I f1, difference_type_t<I> n1,
 				buf_t<I>& buf, Comp& comp, Proj& proj)
@@ -73,7 +73,7 @@ STL2_OPEN_NAMESPACE {
 
 			template <class I, class Comp, class Proj>
 			requires
-				models::Sortable<I, Comp, Proj>
+				Sortable<I, Comp, Proj>()
 			inline void merge_n_step_0(I f0, difference_type_t<I> n0,
 				I f1, difference_type_t<I> n1,
 				Comp& comp, Proj& proj,
@@ -98,7 +98,7 @@ STL2_OPEN_NAMESPACE {
 
 			template <class I, class Comp, class Proj>
 			requires
-				models::Sortable<I, Comp, Proj>
+				Sortable<I, Comp, Proj>()
 			inline void merge_n_step_1(I f0, difference_type_t<I> n0,
 				I f1, difference_type_t<I> n1,
 				Comp& comp, Proj& proj,
@@ -123,7 +123,7 @@ STL2_OPEN_NAMESPACE {
 
 			template <class I, class Comp, class Proj>
 			requires
-				models::Sortable<I, Comp, Proj>
+				Sortable<I, Comp, Proj>()
 			I merge_n_adaptive(I f0, difference_type_t<I> n0,
 				I f1, difference_type_t<I> n1,
 				buf_t<I>& buf, Comp& comp, Proj& proj)
@@ -154,7 +154,7 @@ STL2_OPEN_NAMESPACE {
 
 			template <class I, class Comp, class Proj>
 			requires
-				models::Sortable<I, Comp, Proj>
+				Sortable<I, Comp, Proj>()
 			I sort_n_adaptive(I first, const difference_type_t<I> n, buf_t<I>& buf,
 				Comp& comp, Proj& proj)
 			{
@@ -171,7 +171,7 @@ STL2_OPEN_NAMESPACE {
 
 			template <class I, class Comp = less<>, class Proj = identity>
 			requires
-				models::Sortable<I, __f<Comp>, __f<Proj>>
+				Sortable<I, __f<Comp>, __f<Proj>>()
 			inline I sort_n(I first, const difference_type_t<I> n,
 				Comp&& comp_ = Comp{}, Proj&& proj_ = Proj{})
 			{
@@ -179,7 +179,7 @@ STL2_OPEN_NAMESPACE {
 				auto comp = ext::make_callable_wrapper(__stl2::forward<Comp>(comp_));
 				auto proj = ext::make_callable_wrapper(__stl2::forward<Proj>(proj_));
 				auto ufirst = ext::uncounted(first);
-				static_assert(models::Same<value_type_t<I>, value_type_t<decltype(ufirst)>>);
+				static_assert(Same<value_type_t<I>, value_type_t<decltype(ufirst)>>());
 				using buf_t = temporary_buffer<value_type_t<I>>;
 				// TODO: tune this threshold.
 				auto buf = n / 2 >= 16 ? buf_t{n / 2} : buf_t{};

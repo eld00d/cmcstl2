@@ -26,10 +26,9 @@ STL2_OPEN_NAMESPACE {
 	template <InputIterator I, Sentinel<I> S, WeaklyIncrementable O1,
 		WeaklyIncrementable O2, class Pred, class Proj = identity>
 	requires
-		models::IndirectlyCopyable<I, O1> &&
-		models::IndirectlyCopyable<I, O2> &&
-		models::IndirectCallablePredicate<
-			__f<Pred>, projected<I, __f<Proj>>>
+		IndirectlyCopyable<I, O1>() &&
+		IndirectlyCopyable<I, O2>() &&
+		IndirectCallablePredicate<__f<Pred>, projected<I, __f<Proj>>>()
 	tagged_tuple<tag::in(I), tag::out1(O1), tag::out2(O2)>
 	partition_copy(I first, S last, O1 out_true, O2 out_false, Pred&& pred_,
 		Proj&& proj_ = Proj{})
@@ -53,12 +52,11 @@ STL2_OPEN_NAMESPACE {
 
 	template <InputRange Rng, class O1, class O2, class Pred, class Proj = identity>
 	requires
-		models::WeaklyIncrementable<__f<O1>> &&
-		models::WeaklyIncrementable<__f<O2>> &&
-		models::IndirectlyCopyable<iterator_t<Rng>, __f<O1>> &&
-		models::IndirectlyCopyable<iterator_t<Rng>, __f<O2>> &&
-		models::IndirectCallablePredicate<
-			__f<Pred>, projected<iterator_t<Rng>, __f<Proj>>>
+		WeaklyIncrementable<__f<O1>>() && WeaklyIncrementable<__f<O2>>() &&
+		IndirectlyCopyable<iterator_t<Rng>, __f<O1>>() &&
+		IndirectlyCopyable<iterator_t<Rng>, __f<O2>>() &&
+		IndirectCallablePredicate<
+			__f<Pred>, projected<iterator_t<Rng>, __f<Proj>>>()
 	tagged_tuple<
 		tag::in(safe_iterator_t<Rng>),
 		tag::out1(__f<O1>),
@@ -75,12 +73,12 @@ STL2_OPEN_NAMESPACE {
 	// Extension
 	template <class E, class O1, class O2, class Pred, class Proj = identity>
 	requires
-		models::WeaklyIncrementable<__f<O1>> &&
-		models::WeaklyIncrementable<__f<O2>> &&
-		models::IndirectlyCopyable<const E*, __f<O1>> &&
-		models::IndirectlyCopyable<const E*, __f<O2>> &&
-		models::IndirectCallablePredicate<
-			__f<Pred>, projected<const E*, __f<Proj>>>
+		WeaklyIncrementable<__f<O1>>() &&
+		WeaklyIncrementable<__f<O2>>() &&
+		IndirectlyCopyable<const E*, __f<O1>>() &&
+		IndirectlyCopyable<const E*, __f<O2>>() &&
+		IndirectCallablePredicate<
+			__f<Pred>, projected<const E*, __f<Proj>>>()
 	tagged_tuple<
 		tag::in(dangling<const E*>),
 		tag::out1(__f<O1>),

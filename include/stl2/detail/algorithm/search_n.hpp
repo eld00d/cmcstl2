@@ -36,7 +36,7 @@ STL2_OPEN_NAMESPACE {
 	namespace __search_n {
 		template <ForwardIterator I, Sentinel<I> S, class T, class Pred, class Proj>
 		requires
-			models::IndirectlyComparable<I, const T*, __f<Pred>, __f<Proj>>
+			IndirectlyComparable<I, const T*, __f<Pred>, __f<Proj>>()
 		I unsized(I first, S last, difference_type_t<I> count,
 			const T& value, Pred&& pred_, Proj&& proj_)
 		{
@@ -67,7 +67,7 @@ STL2_OPEN_NAMESPACE {
 
 		template <ForwardIterator I, Sentinel<I> S, class T, class Pred, class Proj>
 		requires
-			models::IndirectlyComparable<I, const T*, __f<Pred>, __f<Proj>>
+			IndirectlyComparable<I, const T*, __f<Pred>, __f<Proj>>()
 		I sized(I first_, S last, difference_type_t<I> d_,
 			difference_type_t<I> count,
 			const T& value, Pred&& pred_, Proj&& proj_)
@@ -99,16 +99,16 @@ STL2_OPEN_NAMESPACE {
 			}
 
 			return __stl2::next(ext::recounted(first_, __stl2::move(first), d_ - d),
-			__stl2::move(last));
+				__stl2::move(last));
 		}
 	}
 
 	template <ForwardIterator I, Sentinel<I> S, class T,
 		class Pred = equal_to<>, class Proj = identity>
 	requires
-		models::IndirectlyComparable<I, const T*, __f<Pred>, __f<Proj>>
+		IndirectlyComparable<I, const T*, __f<Pred>, __f<Proj>>()
 	I search_n(I first, S last, difference_type_t<I> count,
-						 const T& value, Pred&& pred = Pred{}, Proj&& proj = Proj{})
+		const T& value, Pred&& pred = Pred{}, Proj&& proj = Proj{})
 	{
 		return __search_n::unsized(__stl2::move(first), __stl2::move(last),
 			count, value, __stl2::forward<Pred>(pred), __stl2::forward<Proj>(proj));
@@ -117,10 +117,10 @@ STL2_OPEN_NAMESPACE {
 	template <ForwardIterator I, Sentinel<I> S, class T,
 		class Pred = equal_to<>, class Proj = identity>
 	requires
-		models::SizedSentinel<S, I> &&
-		models::IndirectlyComparable<I, const T*, __f<Pred>, __f<Proj>>
+		SizedSentinel<S, I>() &&
+		IndirectlyComparable<I, const T*, __f<Pred>, __f<Proj>>()
 	I search_n(I first, S last, difference_type_t<I> count,
-						 const T& value, Pred&& pred = Pred{}, Proj&& proj = Proj{})
+		const T& value, Pred&& pred = Pred{}, Proj&& proj = Proj{})
 	{
 		auto n = __stl2::distance(first, last);
 		return __search_n::sized(__stl2::move(first), __stl2::move(last),
@@ -129,8 +129,8 @@ STL2_OPEN_NAMESPACE {
 
 	template <ForwardRange Rng, class T, class Pred = equal_to<>, class Proj = identity>
 	requires
-		models::IndirectlyComparable<
-			iterator_t<Rng>, const T*, __f<Pred>, __f<Proj>>
+		IndirectlyComparable<
+			iterator_t<Rng>, const T*, __f<Pred>, __f<Proj>>()
 	safe_iterator_t<Rng>
 	search_n(Rng&& rng, difference_type_t<iterator_t<Rng>> count,
 		const T& value, Pred&& pred = Pred{}, Proj&& proj = Proj{})
@@ -142,9 +142,8 @@ STL2_OPEN_NAMESPACE {
 
 	template <ForwardRange Rng, class T, class Pred = equal_to<>, class Proj = identity>
 	requires
-		models::SizedRange<Rng> &&
-		models::IndirectlyComparable<
-			iterator_t<Rng>, const T*, __f<Pred>, __f<Proj>>
+		SizedRange<Rng>() &&
+		IndirectlyComparable<iterator_t<Rng>, const T*, __f<Pred>, __f<Proj>>()
 	safe_iterator_t<Rng>
 	search_n(Rng&& rng, difference_type_t<iterator_t<Rng>> count,
 		const T& value, Pred&& pred = Pred{}, Proj&& proj = Proj{})
@@ -157,8 +156,7 @@ STL2_OPEN_NAMESPACE {
 
 	template <class E, class T, class Pred = equal_to<>, class Proj = identity>
 	requires
-		models::IndirectlyComparable<
-			const E*, const T*, __f<Pred>, __f<Proj>>
+		IndirectlyComparable<const E*, const T*, __f<Pred>, __f<Proj>>()
 	dangling<const E*>
 	search_n(std::initializer_list<E>&& rng, std::ptrdiff_t count,
 		const T& value, Pred&& pred = Pred{}, Proj&& proj = Proj{})

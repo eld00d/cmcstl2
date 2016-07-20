@@ -28,7 +28,7 @@ STL2_OPEN_NAMESPACE {
 		WeaklyIncrementable O, class Comp = less<>,
 		class Proj1 = identity, class Proj2 = identity>
 	requires
-		models::Mergeable<I1, I2, O, __f<Comp>, __f<Proj1>, __f<Proj2>>
+		Mergeable<I1, I2, O, __f<Comp>, __f<Proj1>, __f<Proj2>>()
 	tagged_tuple<tag::in1(I1), tag::in2(I2), tag::out(O)>
 	set_symmetric_difference(
 		I1 first1, S1 last1, I2 first2, S2 last2, O result,
@@ -77,10 +77,10 @@ STL2_OPEN_NAMESPACE {
 	template <InputRange Rng1, InputRange Rng2, class O, class Comp = less<>,
 		class Proj1 = identity, class Proj2 = identity>
 	requires
-		models::WeaklyIncrementable<__f<O>> &&
-		models::Mergeable<
+		WeaklyIncrementable<__f<O>>() &&
+		Mergeable<
 			iterator_t<Rng1>, iterator_t<Rng2>,
-			__f<O>, __f<Comp>, __f<Proj1>, __f<Proj2>>
+			__f<O>, __f<Comp>, __f<Proj1>, __f<Proj2>>()
 	tagged_tuple<tag::in1(safe_iterator_t<Rng1>),
 							 tag::in2(safe_iterator_t<Rng2>), tag::out(__f<O>)>
 	set_symmetric_difference(Rng1&& rng1, Rng2&& rng2, O&& result,
@@ -96,10 +96,10 @@ STL2_OPEN_NAMESPACE {
 	template <class E, InputRange Rng2, class O, class Comp = less<>,
 		class Proj1 = identity, class Proj2 = identity>
 	requires
-		models::WeaklyIncrementable<__f<O>> &&
-		models::Mergeable<
+		WeaklyIncrementable<__f<O>>() &&
+		Mergeable<
 			const E*, iterator_t<Rng2>,
-			__f<O>, __f<Comp>, __f<Proj1>, __f<Proj2>>
+			__f<O>, __f<Comp>, __f<Proj1>, __f<Proj2>>()
 	tagged_tuple<tag::in1(dangling<const E*>),
 		tag::in2(safe_iterator_t<Rng2>), tag::out(__f<O>)>
 	set_symmetric_difference(std::initializer_list<E>&& rng1, Rng2&& rng2, O&& result,
@@ -115,12 +115,12 @@ STL2_OPEN_NAMESPACE {
 	template <InputRange Rng1, class E, class O, class Comp = less<>,
 		class Proj1 = identity, class Proj2 = identity>
 	requires
-		models::WeaklyIncrementable<__f<O>> &&
-		models::Mergeable<
+		WeaklyIncrementable<__f<O>>() &&
+		Mergeable<
 			iterator_t<Rng1>, const E*,
-			__f<O>, __f<Comp>, __f<Proj1>, __f<Proj2>>
+			__f<O>, __f<Comp>, __f<Proj1>, __f<Proj2>>()
 	tagged_tuple<tag::in1(safe_iterator_t<Rng1>),
-							 tag::in2(dangling<const E*>), tag::out(__f<O>)>
+		tag::in2(dangling<const E*>), tag::out(__f<O>)>
 	set_symmetric_difference(Rng1&& rng1, std::initializer_list<E>&& rng2, O&& result,
 		Comp&& comp = Comp{}, Proj1&& proj1 = Proj1{}, Proj2&& proj2 = Proj2{})
 	{
@@ -134,12 +134,12 @@ STL2_OPEN_NAMESPACE {
 	template <class E1, class E2, class O, class Comp = less<>,
 		class Proj1 = identity, class Proj2 = identity>
 	requires
-		models::WeaklyIncrementable<__f<O>> &&
-		models::Mergeable<
+		WeaklyIncrementable<__f<O>>() &&
+		Mergeable<
 			const E1*, const E2*,
-			__f<O>, __f<Comp>, __f<Proj1>, __f<Proj2>>
+			__f<O>, __f<Comp>, __f<Proj1>, __f<Proj2>>()
 	tagged_tuple<tag::in1(dangling<const E1*>),
-							 tag::in2(dangling<const E2*>), tag::out(__f<O>)>
+		tag::in2(dangling<const E2*>), tag::out(__f<O>)>
 	set_symmetric_difference(std::initializer_list<E1>&& rng1,
 		std::initializer_list<E2>&& rng2, O&& result, Comp&& comp = Comp{},
 		Proj1&& proj1 = Proj1{}, Proj2&& proj2 = Proj2{})

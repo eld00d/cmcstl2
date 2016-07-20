@@ -27,9 +27,8 @@ STL2_OPEN_NAMESPACE {
 	namespace __minmax {
 		template <InputRange Rng, class Comp = less<>, class Proj = identity>
 		requires
-			models::Copyable<value_type_t<iterator_t<Rng>>> &&
-			models::IndirectCallableStrictWeakOrder<
-				__f<Comp>, projected<iterator_t<Rng>, __f<Proj>>>
+			Copyable<value_type_t<iterator_t<Rng>>>() &&
+			IndirectCallableStrictWeakOrder<__f<Comp>, projected<iterator_t<Rng>, __f<Proj>>>()
 		constexpr tagged_pair<tag::min(value_type_t<iterator_t<Rng>>),
 			tag::max(value_type_t<iterator_t<Rng>>)>
 		impl(Rng&& rng, Comp&& comp_ = Comp{}, Proj&& proj_ = Proj{})
@@ -87,8 +86,7 @@ STL2_OPEN_NAMESPACE {
 
 	template<class T, class Comp = less<>, class Proj = identity>
 	requires
-		models::IndirectCallableStrictWeakOrder<
-			__f<Comp>, projected<const T*, __f<Proj>>>
+		IndirectCallableStrictWeakOrder<__f<Comp>, projected<const T*, __f<Proj>>>()
 	constexpr tagged_pair<tag::min(const T&), tag::max(const T&)>
 	minmax(const T& a, const T& b, Comp&& comp_ = Comp{}, Proj&& proj_ = Proj{})
 	{
@@ -103,9 +101,8 @@ STL2_OPEN_NAMESPACE {
 
 	template <InputRange Rng, class Comp = less<>, class Proj = identity>
 	requires
-		models::Copyable<value_type_t<iterator_t<Rng>>> &&
-		models::IndirectCallableStrictWeakOrder<
-			__f<Comp>, projected<iterator_t<Rng>, __f<Proj>>>
+		Copyable<value_type_t<iterator_t<Rng>>>() &&
+		IndirectCallableStrictWeakOrder<__f<Comp>, projected<iterator_t<Rng>, __f<Proj>>>()
 	STL2_CONSTEXPR_EXT tagged_pair<tag::min(value_type_t<iterator_t<Rng>>),
 		tag::max(value_type_t<iterator_t<Rng>>)>
 	minmax(Rng&& rng, Comp&& comp = Comp{}, Proj&& proj = Proj{})
@@ -115,8 +112,7 @@ STL2_OPEN_NAMESPACE {
 
 	template <Copyable T, class Comp = less<>, class Proj = identity>
 	requires
-		models::IndirectCallableStrictWeakOrder<
-			__f<Comp>, projected<const T*, __f<Proj>>>
+		IndirectCallableStrictWeakOrder<__f<Comp>, projected<const T*, __f<Proj>>>()
 	constexpr tagged_pair<tag::min(T), tag::max(T)>
 	minmax(std::initializer_list<T>&& rng, Comp&& comp = Comp{}, Proj&& proj = Proj{})
 	{

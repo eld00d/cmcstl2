@@ -26,8 +26,8 @@ STL2_OPEN_NAMESPACE {
 	template <ForwardIterator I, Sentinel<I> S,
 		class R = equal_to<>, class Proj = identity>
 	requires
-		models::Permutable<I> &&
-		models::IndirectCallableRelation<__f<R>, projected<I, __f<Proj>>>
+		Permutable<I>() &&
+		IndirectCallableRelation<__f<R>, projected<I, __f<Proj>>>()
 	I unique(I first, S last, R&& comp_ = R{}, Proj&& proj_ = Proj{})
 	{
 		auto comp = ext::make_callable_wrapper(__stl2::forward<R>(comp_));
@@ -47,9 +47,8 @@ STL2_OPEN_NAMESPACE {
 
 	template <ForwardRange Rng, class R = equal_to<>, class Proj = identity>
 	requires
-		models::Permutable<iterator_t<Rng>> &&
-		models::IndirectCallableRelation<
-			__f<R>, projected<iterator_t<Rng>, __f<Proj>>>
+		Permutable<iterator_t<Rng>>() &&
+		IndirectCallableRelation<__f<R>, projected<iterator_t<Rng>, __f<Proj>>>()
 	safe_iterator_t<Rng>
 	unique(Rng&& rng, R&& comp = R{}, Proj&& proj = Proj{})
 	{

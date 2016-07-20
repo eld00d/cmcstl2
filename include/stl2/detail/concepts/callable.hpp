@@ -71,13 +71,6 @@ STL2_OPEN_NAMESPACE {
 				Is...>>;
 	}
 
-	namespace models {
-		template <class, class...>
-		constexpr bool IndirectCallable = false;
-		__stl2::IndirectCallable{F, ...Is}
-		constexpr bool IndirectCallable<F, Is...> = true;
-	}
-
 	///////////////////////////////////////////////////////////////////////////
 	// indirect_result_of [indirectcallables.indirectfunc]
 	//
@@ -87,7 +80,7 @@ STL2_OPEN_NAMESPACE {
 	// Not to spec: The function type must be decayed before being constrained.
 	template <class F, class...Is>
 	requires
-		models::IndirectCallable<remove_reference_t<F>, Is...>
+		IndirectCallable<remove_reference_t<F>, Is...>()
 	struct indirect_result_of<F(Is...)>
 	: result_of<F(value_type_t<Is>...)> {};
 
@@ -98,13 +91,6 @@ STL2_OPEN_NAMESPACE {
 	template <class F, class...Is>
 	concept bool IndirectRegularCallable() {
 		return IndirectCallable<F, Is...>();
-	}
-
-	namespace models {
-		template <class, class...>
-		constexpr bool IndirectRegularCallable = false;
-		__stl2::IndirectRegularCallable{F, ...Is}
-		constexpr bool IndirectRegularCallable<F, Is...> = true;
 	}
 
 	template <class, class...> struct __predicate : false_type {};
@@ -127,13 +113,6 @@ STL2_OPEN_NAMESPACE {
 				Is...>>;
 	}
 
-	namespace models {
-		template <class, class...>
-		constexpr bool IndirectCallablePredicate = false;
-		__stl2::IndirectCallablePredicate{F, ...Is}
-		constexpr bool IndirectCallablePredicate<F, Is...> = true;
-	}
-
 	template <class F, class I1, class I2 = I1>
 	concept bool IndirectCallableRelation() {
 		return
@@ -145,23 +124,9 @@ STL2_OPEN_NAMESPACE {
 			Relation<F, iter_common_reference_t<I1>, iter_common_reference_t<I2>>();
 	}
 
-	namespace models {
-		template <class F, class I1, class I2 = I1>
-		constexpr bool IndirectCallableRelation = false;
-		__stl2::IndirectCallableRelation{F, I1, I2}
-		constexpr bool IndirectCallableRelation<F, I1, I2> = true;
-	}
-
 	template <class F, class I1, class I2 = I1>
 	concept bool IndirectCallableStrictWeakOrder() {
 		return IndirectCallableRelation<F, I1, I2>();
-	}
-
-	namespace models {
-		template <class F, class I1, class I2 = I1>
-		constexpr bool IndirectCallableStrictWeakOrder = false;
-		__stl2::IndirectCallableStrictWeakOrder{F, I1, I2}
-		constexpr bool IndirectCallableStrictWeakOrder<F, I1, I2> = true;
 	}
 
 	///////////////////////////////////////////////////////////////////////////

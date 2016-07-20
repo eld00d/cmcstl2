@@ -24,7 +24,7 @@ STL2_OPEN_NAMESPACE {
 		template <Readable I>
 		requires
 			_IsNot<reference_t<I>, is_reference> &&
-			models::Constructible<value_type_t<I>, reference_t<I>>
+			Constructible<value_type_t<I>, reference_t<I>>()
 		class operator_arrow_proxy {
 			value_type_t<I> value_;
 		public:
@@ -58,7 +58,7 @@ STL2_OPEN_NAMESPACE {
 		Readable{I}
 		operator_arrow_proxy<I> operator_arrow(const I& i, ext::priority_tag<0>)
 		noexcept(is_nothrow_move_constructible<operator_arrow_proxy<I>>::value &&
-						 noexcept(operator_arrow_proxy<I>{*i}))
+			noexcept(operator_arrow_proxy<I>{*i}))
 		{
 			return operator_arrow_proxy<I>{*i};
 		}
@@ -70,7 +70,9 @@ STL2_OPEN_NAMESPACE {
 			detail::operator_arrow(i, ext::max_priority_tag);
 		}
 	decltype(auto) __operator_arrow(const I& i)
-	STL2_NOEXCEPT_RETURN(detail::operator_arrow(i, ext::max_priority_tag))
+	STL2_NOEXCEPT_RETURN(
+		detail::operator_arrow(i, ext::max_priority_tag)
+	)
 } STL2_CLOSE_NAMESPACE
 
 #endif

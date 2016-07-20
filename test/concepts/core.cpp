@@ -12,20 +12,9 @@
 #include "validate.hpp"
 
 #if VALIDATE_RANGES
-namespace models {
-template <class...Ts>
-constexpr bool Same = ranges::Same<Ts...>();
-
-template <class T, class U>
-constexpr bool ConvertibleTo = ranges::ConvertibleTo<T, U>();
-
-template <class T, class U>
-constexpr bool Common = ranges::Common<T, U>();
-}
-
 namespace ns {
-template <class T, class U>
-using common_type_t = ranges::common_type_t<T, U>;
+	template <class T, class U>
+	using common_type_t = ranges::common_type_t<T, U>;
 }
 
 #elif VALIDATE_STL2
@@ -33,7 +22,7 @@ using common_type_t = ranges::common_type_t<T, U>;
 #include <stl2/utility.hpp>
 
 namespace ns {
-using __stl2::common_type_t;
+	using __stl2::common_type_t;
 }
 #endif
 
@@ -42,15 +31,15 @@ using __stl2::common_type_t;
 
 #include "../simple_test.hpp"
 
-CONCEPT_ASSERT(models::Same<>);
-CONCEPT_ASSERT(models::Same<int, int>);
-CONCEPT_ASSERT(models::Same<double, double>);
-CONCEPT_ASSERT(models::Same<double>);
-CONCEPT_ASSERT(!models::Same<double, int>);
-CONCEPT_ASSERT(!models::Same<int, double>);
+CONCEPT_ASSERT(ranges::Same<>());
+CONCEPT_ASSERT(ranges::Same<int, int>());
+CONCEPT_ASSERT(ranges::Same<double, double>());
+CONCEPT_ASSERT(ranges::Same<double>());
+CONCEPT_ASSERT(!ranges::Same<double, int>());
+CONCEPT_ASSERT(!ranges::Same<int, double>());
 
-CONCEPT_ASSERT(models::Same<int, int, int, int>);
-CONCEPT_ASSERT(!models::Same<int, int, double, int>);
+CONCEPT_ASSERT(ranges::Same<int, int, int, int>());
+CONCEPT_ASSERT(!ranges::Same<int, int, double, int>());
 
 #if VALIDATE_STL2
 namespace publicly_derived_from_test {
@@ -60,18 +49,18 @@ struct B : A {};
 struct C : A {};
 struct D : B, C {};
 
-CONCEPT_ASSERT(models::PubliclyDerivedFrom<int,int>);
-CONCEPT_ASSERT(models::PubliclyDerivedFrom<A,A>);
-CONCEPT_ASSERT(models::PubliclyDerivedFrom<B,B>);
-CONCEPT_ASSERT(models::PubliclyDerivedFrom<C,C>);
-CONCEPT_ASSERT(models::PubliclyDerivedFrom<D,D>);
-CONCEPT_ASSERT(models::PubliclyDerivedFrom<B,A>);
-CONCEPT_ASSERT(models::PubliclyDerivedFrom<C,A>);
-CONCEPT_ASSERT(!models::PubliclyDerivedFrom<A,B>);
-CONCEPT_ASSERT(!models::PubliclyDerivedFrom<A,C>);
-CONCEPT_ASSERT(!models::PubliclyDerivedFrom<A,D>);
-CONCEPT_ASSERT(!models::PubliclyDerivedFrom<D,A>);
-CONCEPT_ASSERT(!models::PubliclyDerivedFrom<int,void>);
+CONCEPT_ASSERT(ranges::ext::PubliclyDerivedFrom<int,int>());
+CONCEPT_ASSERT(ranges::ext::PubliclyDerivedFrom<A,A>());
+CONCEPT_ASSERT(ranges::ext::PubliclyDerivedFrom<B,B>());
+CONCEPT_ASSERT(ranges::ext::PubliclyDerivedFrom<C,C>());
+CONCEPT_ASSERT(ranges::ext::PubliclyDerivedFrom<D,D>());
+CONCEPT_ASSERT(ranges::ext::PubliclyDerivedFrom<B,A>());
+CONCEPT_ASSERT(ranges::ext::PubliclyDerivedFrom<C,A>());
+CONCEPT_ASSERT(!ranges::ext::PubliclyDerivedFrom<A,B>());
+CONCEPT_ASSERT(!ranges::ext::PubliclyDerivedFrom<A,C>());
+CONCEPT_ASSERT(!ranges::ext::PubliclyDerivedFrom<A,D>());
+CONCEPT_ASSERT(!ranges::ext::PubliclyDerivedFrom<D,A>());
+CONCEPT_ASSERT(!ranges::ext::PubliclyDerivedFrom<int,void>());
 }
 #endif
 
@@ -79,36 +68,36 @@ namespace convertible_to_test {
 struct A {};
 struct B : A {};
 
-CONCEPT_ASSERT(models::ConvertibleTo<A, A>);
-CONCEPT_ASSERT(models::ConvertibleTo<B, B>);
-CONCEPT_ASSERT(!models::ConvertibleTo<A, B>);
-CONCEPT_ASSERT(models::ConvertibleTo<B, A>);
-CONCEPT_ASSERT(models::ConvertibleTo<int, double>);
-CONCEPT_ASSERT(models::ConvertibleTo<double, int>);
+CONCEPT_ASSERT(ranges::ConvertibleTo<A, A>());
+CONCEPT_ASSERT(ranges::ConvertibleTo<B, B>());
+CONCEPT_ASSERT(!ranges::ConvertibleTo<A, B>());
+CONCEPT_ASSERT(ranges::ConvertibleTo<B, A>());
+CONCEPT_ASSERT(ranges::ConvertibleTo<int, double>());
+CONCEPT_ASSERT(ranges::ConvertibleTo<double, int>());
 }
 
 namespace common_test {
-CONCEPT_ASSERT(models::Same<ns::common_type_t<int, int>, int>);
-//CONCEPT_ASSERT(models::Same<ns::common_type_t<int, float, double>, double>);
+CONCEPT_ASSERT(ranges::Same<ns::common_type_t<int, int>, int>());
+//CONCEPT_ASSERT(ranges::Same<ns::common_type_t<int, float, double>, double>());
 
-CONCEPT_ASSERT(models::Common<int, int>);
-CONCEPT_ASSERT(models::Common<int, double>);
-CONCEPT_ASSERT(models::Common<double, int>);
-CONCEPT_ASSERT(models::Common<double, double>);
-CONCEPT_ASSERT(!models::Common<void, int>);
-CONCEPT_ASSERT(!models::Common<int*, int>);
-CONCEPT_ASSERT(models::Common<void*, int*>);
-CONCEPT_ASSERT(models::Common<double,long long>);
-//CONCEPT_ASSERT(models::Common<int, float, double>);
-//CONCEPT_ASSERT(!models::Common<int, float, double, void>);
+CONCEPT_ASSERT(ranges::Common<int, int>());
+CONCEPT_ASSERT(ranges::Common<int, double>());
+CONCEPT_ASSERT(ranges::Common<double, int>());
+CONCEPT_ASSERT(ranges::Common<double, double>());
+CONCEPT_ASSERT(!ranges::Common<void, int>());
+CONCEPT_ASSERT(!ranges::Common<int*, int>());
+CONCEPT_ASSERT(ranges::Common<void*, int*>());
+CONCEPT_ASSERT(ranges::Common<double,long long>());
+//CONCEPT_ASSERT(ranges::Common<int, float, double>());
+//CONCEPT_ASSERT(!ranges::Common<int, float, double, void>());
 
 struct B {};
 struct C { C() = default; C(B) {} C(int) {} };
-CONCEPT_ASSERT(models::Common<B,C>);
-//CONCEPT_ASSERT(models::Common<int, C, B>);
+CONCEPT_ASSERT(ranges::Common<B,C>());
+//CONCEPT_ASSERT(ranges::Common<int, C, B>());
 
 struct incomplete;
-CONCEPT_ASSERT(models::Common<void*, incomplete*>);
+CONCEPT_ASSERT(ranges::Common<void*, incomplete*>());
 }
 
 namespace {
@@ -139,7 +128,7 @@ result f(__stl2::ConvertibleTo<A>) {
 	return result::convertible;
 }
 
-	result f(__stl2::ext::ExplicitlyConvertibleTo<A>) {
+result f(__stl2::ext::ExplicitlyConvertibleTo<A>) {
 	std::cout << "Explicitly convertible to A\n";
 	return result::explicitly_convertible;
 }

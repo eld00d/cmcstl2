@@ -25,8 +25,7 @@ STL2_OPEN_NAMESPACE {
 	template <ForwardIterator I, Sentinel<I> S, class Comp = less<>,
 		class Proj = identity>
 	requires
-		models::IndirectCallableStrictWeakOrder<
-			__f<Comp>, projected<I, __f<Proj>>>
+		IndirectCallableStrictWeakOrder<__f<Comp>, projected<I, __f<Proj>>>()
 	bool is_sorted(I first, S last, Comp&& comp = Comp{}, Proj&& proj = Proj{})
 	{
 		return last == __stl2::is_sorted_until(__stl2::move(first), last,
@@ -35,8 +34,7 @@ STL2_OPEN_NAMESPACE {
 
 	template<ForwardRange Rng, class Comp = less<>, class Proj = identity>
 	requires
-		models::IndirectCallableStrictWeakOrder<
-			__f<Comp>, projected<iterator_t<Rng>, __f<Proj>>>
+		IndirectCallableStrictWeakOrder<__f<Comp>, projected<iterator_t<Rng>, __f<Proj>>>()
 	bool is_sorted(Rng&& rng, Comp&& comp = Comp{}, Proj&& proj = Proj{})
 	{
 		return __stl2::end(rng) ==
@@ -47,8 +45,7 @@ STL2_OPEN_NAMESPACE {
 	// Extension
 	template<class E, class Comp = less<>, class Proj = identity>
 	requires
-		models::IndirectCallableStrictWeakOrder<
-			__f<Comp>, projected<const E*, __f<Proj>>>
+		IndirectCallableStrictWeakOrder<__f<Comp>, projected<const E*, __f<Proj>>>()
 	bool is_sorted(std::initializer_list<E>&& rng, Comp&& comp = Comp{}, Proj&& proj = Proj{})
 	{
 		return __stl2::end(rng) ==

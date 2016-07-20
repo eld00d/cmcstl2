@@ -15,7 +15,6 @@
 #include "simple_test.hpp"
 
 namespace ranges = ::std::experimental::ranges;
-namespace models = ranges::models;
 
 #if ASSEMBLY // Only for assembly inspection.
 using T = int;
@@ -110,7 +109,7 @@ int main() {
 		CHECK(!o);
 		{
 			auto oi = ranges::make_optional(42);
-			static_assert(models::Swappable<ranges::optional<int>&>);
+			static_assert(ranges::Swappable<ranges::optional<int>&>());
 			ranges::swap(o, oi);
 			CHECK(!oi);
 			CHECK(o);
@@ -146,8 +145,8 @@ int main() {
 	{
 		using OI = ranges::optional<int>;
 		using OD = ranges::optional<double>;
-		static_assert(models::StrictTotallyOrdered<OI, OD>);
-		static_assert(!models::Swappable<OI&, OD&>);
+		static_assert(ranges::StrictTotallyOrdered<OI, OD>());
+		static_assert(!ranges::Swappable<OI&, OD&>());
 	}
 
 	{

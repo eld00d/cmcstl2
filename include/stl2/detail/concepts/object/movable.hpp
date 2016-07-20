@@ -28,13 +28,6 @@ STL2_OPEN_NAMESPACE {
 			Assignable<T&, T&&>() &&
 			Swappable<T&>();
 	}
-
-	namespace models {
-		template <class>
-		constexpr bool Movable = false;
-		__stl2::Movable{T}
-		constexpr bool Movable<T> = true;
-	}
 } STL2_CLOSE_NAMESPACE
 
 #endif

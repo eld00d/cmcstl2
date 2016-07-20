@@ -31,8 +31,8 @@ STL2_OPEN_NAMESPACE {
 
 	template <class Rng, class F>
 	requires
-		models::Callable<__f<F>> &&
-		models::OutputRange<Rng, result_of_t<__f<F>&()>>
+		Callable<__f<F>>() &&
+		OutputRange<Rng, result_of_t<__f<F>&()>>()
 	safe_iterator_t<Rng>
 	generate(Rng&& rng, F&& gen)
 	{

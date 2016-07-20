@@ -11,22 +11,7 @@
 //
 #include "validate.hpp"
 
-#if VALIDATE_RANGES
-namespace models {
-template <class T>
-constexpr bool Boolean =
-	std::is_same<T, bool>(); // Obviously many tests will fail ;)
-
-template <class T, class U = T>
-constexpr bool EqualityComparable =
-	ranges::EqualityComparable<T, U>();
-
-template <class T, class U = T>
-constexpr bool StrictTotallyOrdered =
-	ranges::StrictTotallyOrdered<T, U>();
-}
-
-#elif VALIDATE_STL2
+#if VALIDATE_STL2
 #include <stl2/detail/concepts/compare.hpp>
 #endif
 
@@ -37,18 +22,18 @@ constexpr bool StrictTotallyOrdered =
 namespace boolean_test {
 // Better have at least these three, since we use them as
 // examples in the TS draft.
-CONCEPT_ASSERT(models::Boolean<bool>);
-CONCEPT_ASSERT(models::Boolean<std::true_type>);
-CONCEPT_ASSERT(models::Boolean<std::bitset<42>::reference>);
+CONCEPT_ASSERT(ranges::Boolean<bool>());
+CONCEPT_ASSERT(ranges::Boolean<std::true_type>());
+CONCEPT_ASSERT(ranges::Boolean<std::bitset<42>::reference>());
 
-CONCEPT_ASSERT(models::Boolean<int>);
-CONCEPT_ASSERT(!models::Boolean<void*>);
+CONCEPT_ASSERT(ranges::Boolean<int>());
+CONCEPT_ASSERT(!ranges::Boolean<void*>());
 
 struct A {};
 struct B { operator bool() const; };
 
-CONCEPT_ASSERT(!models::Boolean<A>);
-CONCEPT_ASSERT(models::Boolean<B>);
+CONCEPT_ASSERT(!ranges::Boolean<A>());
+CONCEPT_ASSERT(ranges::Boolean<B>());
 }
 
 namespace equality_comparable_test {
@@ -57,23 +42,23 @@ struct A {
 	friend bool operator!=(const A&, const A&);
 };
 
-CONCEPT_ASSERT(models::EqualityComparable<int>);
-CONCEPT_ASSERT(models::EqualityComparable<A>);
-CONCEPT_ASSERT(!models::EqualityComparable<void>);
+CONCEPT_ASSERT(ranges::EqualityComparable<int>());
+CONCEPT_ASSERT(ranges::EqualityComparable<A>());
+CONCEPT_ASSERT(!ranges::EqualityComparable<void>());
 
-CONCEPT_ASSERT(models::EqualityComparable<int, int>);
-CONCEPT_ASSERT(models::EqualityComparable<A, A>);
-CONCEPT_ASSERT(!models::EqualityComparable<void, void>);
+CONCEPT_ASSERT(ranges::EqualityComparable<int, int>());
+CONCEPT_ASSERT(ranges::EqualityComparable<A, A>());
+CONCEPT_ASSERT(!ranges::EqualityComparable<void, void>());
 } // namespace equality_comparable_test
 
-CONCEPT_ASSERT(models::StrictTotallyOrdered<int>);
-CONCEPT_ASSERT(models::StrictTotallyOrdered<float>);
-CONCEPT_ASSERT(models::StrictTotallyOrdered<std::nullptr_t>);
-CONCEPT_ASSERT(!models::StrictTotallyOrdered<void>);
+CONCEPT_ASSERT(ranges::StrictTotallyOrdered<int>());
+CONCEPT_ASSERT(ranges::StrictTotallyOrdered<float>());
+CONCEPT_ASSERT(ranges::StrictTotallyOrdered<std::nullptr_t>());
+CONCEPT_ASSERT(!ranges::StrictTotallyOrdered<void>());
 
-CONCEPT_ASSERT(models::StrictTotallyOrdered<int, int>);
-CONCEPT_ASSERT(models::StrictTotallyOrdered<int, double>);
-CONCEPT_ASSERT(!models::StrictTotallyOrdered<int, void>);
+CONCEPT_ASSERT(ranges::StrictTotallyOrdered<int, int>());
+CONCEPT_ASSERT(ranges::StrictTotallyOrdered<int, double>());
+CONCEPT_ASSERT(!ranges::StrictTotallyOrdered<int, void>());
 
 int main() {
 	return ::test_result();

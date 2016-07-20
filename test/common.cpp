@@ -150,9 +150,9 @@ static_assert(is_same<
 	Z2
 >::value, "");
 
-static_assert(models::CommonReference<void, void>);
+static_assert(CommonReference<void, void>());
 static_assert(is_same<common_reference_t<void, void>, void>());
-static_assert(models::Common<void, void>);
+static_assert(Common<void, void>());
 static_assert(is_same<common_type_t<void, void>, void>());
 
 int main() {
