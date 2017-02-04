@@ -1,6 +1,6 @@
 // cmcstl2 - A concept-enabled C++ standard library
 //
-//  Copyright Casey Carter 2015
+//  Copyright Casey Carter 2015, 2017
 //
 //  Use, modification and distribution is subject to the
 //  Boost Software License, Version 1.0. (See accompanying
@@ -12,60 +12,83 @@
 #ifndef STL2_DETAIL_COMPRESSED_PAIR_HPP
 #define STL2_DETAIL_COMPRESSED_PAIR_HPP
 
-#include <stl2/detail/ebo_box.hpp>
+#include <utility>
+#include <stl2/detail/compressed_tuple.hpp>
 #include <stl2/detail/fwd.hpp>
 #include <stl2/detail/meta.hpp>
+#include <stl2/detail/tagged.hpp>
 #include <stl2/detail/concepts/object.hpp>
 
 STL2_OPEN_NAMESPACE {
 	namespace ext {
-		template <Destructible T, Destructible U>
-		class compressed_pair :
-			detail::ebo_box<T, meta::size_t<0>>,
-			detail::ebo_box<U, meta::size_t<1>> {
-			using first_t = detail::ebo_box<T, meta::size_t<0>>;
-			using second_t = detail::ebo_box<U, meta::size_t<1>>;
+		template <class First, class Second>
+		requires
+			models::Destructible<First> &&
+			models::Destructible<Second>
+		struct compressed_pair
+		: tagged_compressed_tuple<tag::first(First), tag::second(Second)>
+		{
+		private:
+			using base_t = tagged_compressed_tuple<tag::first(First), tag::second(Second)>;
 		public:
-			compressed_pair()
-			requires DefaultConstructible<T>() &&
-				DefaultConstructible<U>() = default;
+#if STL2_WORKAROUND_GCC_79143
+			compressed_pair() = default;
 
-			template <typename TT = T, typename UU = U>
+			// TODO: EXPLICIT
+			template <class Arg1, class Arg2>
 			requires
-				Constructible<T, TT>() && Constructible<U, UU>()
-			constexpr compressed_pair(TT&& t, UU&& u)
-			noexcept(is_nothrow_constructible<first_t, TT&&>::value &&
-				is_nothrow_constructible<second_t, UU&&>::value)
-			: first_t(__stl2::forward<TT>(t))
-			, second_t(__stl2::forward<UU>(u)) {}
+				models::Constructible<First, Arg1> &&
+				models::Constructible<Second, Arg2>
+			constexpr compressed_pair(Arg1&& first, Arg2&& second)
+			noexcept(std::is_nothrow_constructible<First, Arg1>::value &&
+				std::is_nothrow_constructible<Second, Arg2>::value )
+			: base_t(std::forward<Arg1>(first), std::forward<Arg2>(second))
+			{}
 
-			constexpr T& first() & noexcept {
-				return first_t::get();
-			}
-			constexpr const T& first() const& noexcept {
-				return first_t::get();
-			}
-			constexpr T&& first() && noexcept {
-				return __stl2::move(*this).first_t::get();
-			}
-			constexpr const T&& first() const&& noexcept {
-				return __stl2::move(*this).first_t::get();
-			}
+#else  // STL2_WORKAROUND_GCC_79143
+			using base_t::base_t;
+#endif // STL2_WORKAROUND_GCC_79143
 
-			constexpr U& second() & noexcept {
-				return second_t::get();
-			}
-			constexpr const U& second() const& noexcept {
-				return second_t::get();
-			}
-			constexpr U&& second() && noexcept {
-				return __stl2::move(*this).second_t::get();
-			}
-			constexpr const U&& second() const&& noexcept {
-				return __stl2::move(*this).second_t::get();
+			using base_t::first;
+			using base_t::second;
+
+			template <class F, class S>
+			requires
+				models::Constructible<F, const First&> &&
+				models::Constructible<S, const Second&>
+			constexpr operator std::pair<F, S> () const {
+				return std::pair<F, S>{first(), second()};
 			}
 		};
-	}
+
+		template <class First, class Second>
+		requires
+			models::Constructible<__unwrap<First>, First> &&
+			models::Constructible<__unwrap<Second>, Second>
+		constexpr auto make_compressed_pair(First&& f, Second&& s)
+		STL2_NOEXCEPT_RETURN(
+			compressed_pair<__unwrap<First>, __unwrap<Second>>{
+				std::forward<First>(f), std::forward<Second>(s)
+			}
+		)
+	} // namespace ext
 } STL2_CLOSE_NAMESPACE
+
+namespace std {
+	template <class First, class Second>
+	struct tuple_size< ::__stl2::ext::compressed_pair<First, Second>>
+	: integral_constant<size_t, 2>
+	{};
+
+	template <class First, class Second>
+	struct tuple_element<0, ::__stl2::ext::compressed_pair<First, Second>> {
+		using type = First;
+	};
+
+	template <class First, class Second>
+	struct tuple_element<1, ::__stl2::ext::compressed_pair<First, Second>> {
+		using type = Second;
+	};
+} // namespace std
 
 #endif

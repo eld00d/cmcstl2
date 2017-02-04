@@ -94,7 +94,6 @@ STL2_OPEN_NAMESPACE {
 	struct tagged
 	: Base, __getters::collect<tagged<Base, Tags...>, Tags...>
 	{
-		using Base::Base;
 		tagged() = default;
 
 		template <class Other>
@@ -108,6 +107,17 @@ STL2_OPEN_NAMESPACE {
 		constexpr tagged(tagged<Other, Tags...> const& that)
 		noexcept(is_nothrow_constructible<Base, const Other&>::value)
 		: Base(static_cast<const Other&>(that)) {}
+
+#if STL2_WORKAROUND_GCC_79143
+		template <class... Args>
+		requires
+			models::Constructible<Base, Args...>
+		constexpr tagged(Args&&... args)
+		noexcept(std::is_nothrow_constructible<Base, Args...>::value)
+		: Base(std::forward<Args>(args)...) {}
+#else  // STL2_WORKAROUND_GCC_79143
+		using Base::Base;
+#endif // STL2_WORKAROUND_GCC_79143
 
 		template <class Other>
 		requires Assignable<Base&, Other>()
@@ -223,7 +233,11 @@ STL2_OPEN_NAMESPACE {
 		STL2_DEFINE_GETTER(max)
 		STL2_DEFINE_GETTER(begin)
 		STL2_DEFINE_GETTER(end)
+		STL2_DEFINE_GETTER(cnt) // Extension
 		STL2_DEFINE_GETTER(count) // Extension
+		STL2_DEFINE_GETTER(current) // Extension
+		STL2_DEFINE_GETTER(first) // Extension
+		STL2_DEFINE_GETTER(second) // Extension
 	}
 
 	#undef STL2_DEFINE_GETTER

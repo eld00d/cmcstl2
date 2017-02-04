@@ -33,13 +33,14 @@
 #endif // __GNUC__
 #endif // __clang__
 
-#ifndef STL2_WORKAROUND_GCC_79143
-#if defined(__GNUC__) && __GNUC__ >= 7
-// Inheriting constructors don't work with list initialization in GCC 7.
-// https://gcc.gnu.org/bugzilla/show_bug.cgi?id=79143
-#define STL2_WORKAROUND_GCC_79143 1
+#ifndef STL2_WORKAROUND_GCC_68812
+#if defined(__GNUC__)
+// Fold expression failure when combining dependent and non-dependent parameter
+// packs in a requires clause.
+// https://gcc.gnu.org/bugzilla/show_bug.cgi?id=68812
+#define STL2_WORKAROUND_GCC_68812 1
 #else
-#define STL2_WORKAROUND_GCC_79143 0
+#define STL2_WORKAROUND_GCC_68812 0
 #endif
 #endif
 
@@ -50,6 +51,16 @@
 #define STL2_WORKAROUND_GCC_69096 1
 #else
 #define STL2_WORKAROUND_GCC_69096 0
+#endif
+#endif
+
+#ifndef STL2_WORKAROUND_GCC_79143
+#if defined(__GNUC__) && __GNUC__ >= 7
+// Inheriting constructors don't work with list initialization in GCC 7.
+// https://gcc.gnu.org/bugzilla/show_bug.cgi?id=79143
+#define STL2_WORKAROUND_GCC_79143 1
+#else
+#define STL2_WORKAROUND_GCC_79143 0
 #endif
 #endif
 
