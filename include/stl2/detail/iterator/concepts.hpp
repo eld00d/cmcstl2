@@ -777,7 +777,7 @@ STL2_OPEN_NAMESPACE {
 			};
 	}
 } STL2_CLOSE_NAMESPACE
-
+/*
 namespace std {
 	template <::__stl2::Iterator Out>
 		// HACKHACK to avoid partial specialization after instantiation errors. Platform
@@ -817,5 +817,5 @@ namespace std {
 					::__stl2::reference_t<In>>;
 	};
 } // namespace std
-
+*/
 #endif
